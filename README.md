@@ -1,17 +1,18 @@
 
-# 🍹 DrinksTime
+# 🍜 YumEat
 
-**DrinksTime** is a mobile application developed for Android using Kotlin. The app serves as a platform to compare offers and announcements from nearby bars based on the user's location, with a focus on coastal areas. Whether you're looking for the best deals, live music events, or just want to explore the local bar scene, DrinksTime is your go-to app for discovering and comparing what's on offer.
+**YumEat** is a mobile application developed for Android using Kotlin. The app serves as a platform to compare offers and announcements from nearby bars based on the user's location, with a focus on coastal areas. Whether you're looking for the best deals, live music events, or just want to explore the local bar scene, DrinksTime is your go-to app for discovering and comparing what's on offer.
 
 ## 🎯 Project Overview
 
 ### Purpose
 
-The primary goal of DrinksTime is to enhance the nightlife experience by providing users with up-to-date information on bars near their location, particularly in coastal regions. The app features filters to compare bars based on their proximity to the beach, and users can view details such as operating hours, promotions, live events, and menus. 
+The primary goal of YumEat is to enhance the eating and nightlife experience by providing users with up-to-date information about pubs and restaurants near their location, particularly in coastal regions. The app features filters to compare these based on user's preferences. Users can view details such as operating hours, promotions, live events, and menus. 
 
 ### Key Features
 
-- **Location-Based Recommendations**: Find bars based on your current location, with a special focus on bars near the beach.
+- **Location-Based Recommendations**: Find pubs and restaurants based on your current location.
+- **Special Events**: Get information about special events (promotions, live music, etc.)
 - **User Roles**: 
   - **Main Administrator**: Full control over the app's content and user management.
   - **Request Validator Administrator**: Validates business registration requests and their postings.
@@ -48,8 +49,8 @@ The database is structured to efficiently manage user roles, business informatio
 
 ### User Interface
 
-- **Home Screen**: Displays location-based bar recommendations and promotions.
-- **Search and Filter**: Allows users to search for bars by name, location, or specific filters (e.g., live music, proximity to the beach).
+- **Home Screen**: Displays location-based recommendations and promotions.
+- **Search and Filter**: Allows users to search for pubs by name, location, or specific filters (e.g., live music, proximity to the beach).
 - **Bar Profile**: Detailed view of the bar, including operating hours, menu, current promotions, and upcoming events.
 - **Admin Dashboard**: For administrators to manage user roles, validate business registrations, and review reports.
 - **Seller Dashboard**: Allows business owners to create, update, and manage their posts.
@@ -57,7 +58,7 @@ The database is structured to efficiently manage user roles, business informatio
 
 ## 📊 Reporting
 
-DrinksTime includes a robust reporting system that allows administrators to generate various reports, including:
+YumEat includes a robust reporting system that allows administrators to generate various reports, including:
 
 - **User Activity Reports**: Track user engagement and interactions within the app.
 - **Business Performance Reports**: Analyze how businesses are performing based on user ratings, post interactions, and sales metrics.
@@ -69,7 +70,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 👥 Team
 
-Meet the team behind DrinksTime:
+Meet the team behind YumEat:
 
 - **Axel Leonardo Sandoval Heredia** - [@AxelSandovalH](https://github.com/AxelSandovalH)
 - **Marco Antonio García Gámez** - [@mggmz](https://github.com/mggmz)
