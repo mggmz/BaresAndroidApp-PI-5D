@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.zIndex
 
 
 // Crear FontFamily para Quicksand y Raleway
@@ -71,24 +72,26 @@ fun OnboardingScreen() {
             modifier = Modifier.padding(top = 4.dp)
         )
 
+        // Imagen que se superpone al recuadro
         Box(
             modifier = Modifier
-                .size(200.dp) // Aumentamos el tamaño del Box
+
+                .size(250.dp)
+                .absoluteOffset(y = -5.dp) // Ajuste para superponer la imagen sobre el recuadro
         ) {
             Image(
-                painter = painterResource(id = R.drawable.food_image), // Reemplaza con tu recurso de imagen
+                painter = painterResource(id = R.drawable.food_image),
                 contentDescription = "Food Image",
                 modifier = Modifier
-                    .fillMaxSize(), // Asegura que la imagen llene todo el espacio del Box
-                contentScale = ContentScale.Crop // Esto ajusta la imagen para que llene el Box
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
         }
 
-
-        // Caja estática para el rectángulo naranja
+        // Caja estática para el recuadro naranja
         Box(
             modifier = Modifier
-
+                .offset(y = (-100).dp) // En lugar de padding negativo, usa offset para mover el recuadro hacia arriba
                 .clip(RoundedCornerShape(30.dp))
                 .background(
                     brush = Brush.linearGradient(
@@ -97,7 +100,8 @@ fun OnboardingScreen() {
                         end = Offset(600f, 800f)
                     )
                 )
-                .size(350.dp, 500.dp),
+                .size(350.dp, 500.dp)
+                .zIndex(-1f), // Asegura que el recuadro naranja esté detrás de la imagen
             contentAlignment = Alignment.Center
         ) {
             // Implementación de HorizontalPager para el efecto de deslizar
@@ -127,7 +131,7 @@ fun OnboardingScreen() {
             }
         }
 
-        // Botones de texto "Previous", "Get Started", y "Next" fuera del rectángulo naranja
+        // Botones de texto "Previous", "Get Started", y "Next"
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -138,7 +142,7 @@ fun OnboardingScreen() {
             // Botón Previous solo si no estamos en la primera página
             PreviousButton(pagerState, coroutineScope)
 
-            Spacer(modifier = Modifier.weight(1f)) // Espacio flexible para alinear los botones
+            Spacer(modifier = Modifier.weight(1f))
 
             // Botón "Get Started" en el centro
             if (pagerState.currentPage == pagerItems.size - 1) {
@@ -149,14 +153,14 @@ fun OnboardingScreen() {
                         .width(180.dp),
                     shape = RoundedCornerShape(30.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFC700) // Color amarillo del botón
+                        containerColor = Color(0xFFFFC700)
                     )
                 ) {
                     Text(text = "Get Started!!", color = Color.Black)
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f)) // Espacio flexible
+            Spacer(modifier = Modifier.weight(1f))
 
             // Botón Next solo si no estamos en la última página
             if (pagerState.currentPage < pagerItems.size - 1) {
@@ -190,8 +194,3 @@ private fun PreviousButton(pagerState: PagerState, coroutineScope: CoroutineScop
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun OnboardingScreenPreview() {
-    OnboardingScreen()
-}
