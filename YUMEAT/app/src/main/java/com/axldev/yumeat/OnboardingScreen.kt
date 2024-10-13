@@ -2,10 +2,8 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -23,16 +21,13 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.zIndex
-
 
 // Crear FontFamily para Quicksand y Raleway
 val quicksandFont = FontFamily(Font(R.font.quicksand))
@@ -75,15 +70,13 @@ fun OnboardingScreen() {
         // Imagen que se superpone al recuadro
         Box(
             modifier = Modifier
-
                 .size(250.dp)
-                .absoluteOffset(y = -5.dp) // Ajuste para superponer la imagen sobre el recuadro
+                .absoluteOffset(y = -5.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.food_image),
                 contentDescription = "Food Image",
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         }
@@ -91,7 +84,7 @@ fun OnboardingScreen() {
         // Caja estática para el recuadro naranja
         Box(
             modifier = Modifier
-                .offset(y = (-100).dp) // En lugar de padding negativo, usa offset para mover el recuadro hacia arriba
+                .offset(y = (-100).dp)
                 .clip(RoundedCornerShape(30.dp))
                 .background(
                     brush = Brush.linearGradient(
@@ -101,10 +94,9 @@ fun OnboardingScreen() {
                     )
                 )
                 .size(350.dp, 500.dp)
-                .zIndex(-1f), // Asegura que el recuadro naranja esté detrás de la imagen
+                .zIndex(-1f),
             contentAlignment = Alignment.Center
         ) {
-            // Implementación de HorizontalPager para el efecto de deslizar
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
@@ -131,66 +123,32 @@ fun OnboardingScreen() {
             }
         }
 
-        // Botones de texto "Previous", "Get Started", y "Next"
-        Row(
+        // Botón "Get Started" siempre visible
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, start = 32.dp, end = 32.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(bottom = 16.dp)
+                .offset(y = (-40).dp), // Superposición ligera sobre el recuadro naranja
+            contentAlignment = Alignment.Center
         ) {
-            // Botón Previous solo si no estamos en la primera página
-            PreviousButton(pagerState, coroutineScope)
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Botón "Get Started" en el centro
-            if (pagerState.currentPage == pagerItems.size - 1) {
-                Button(
-                    onClick = { /* Acción del botón Get Started */ },
-                    modifier = Modifier
-                        .height(60.dp)
-                        .width(180.dp),
-                    shape = RoundedCornerShape(30.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFC700)
-                    )
-                ) {
-                    Text(text = "Get Started!!", color = Color.Black)
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Botón Next solo si no estamos en la última página
-            if (pagerState.currentPage < pagerItems.size - 1) {
-                Text(
-                    text = "Next >>",
-                    color = Color.Black,
-                    modifier = Modifier.clickable {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        }
-                    }
+            Button(
+                onClick = { /* Acción del botón Get Started */ },
+                modifier = Modifier
+                    .height(60.dp)
+                    .width(180.dp),
+                shape = RoundedCornerShape(30.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFC700)
                 )
+            ) {
+                Text(text = "Get Started!!", color = Color.Black)
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@Preview(showBackground = true)
 @Composable
-private fun PreviousButton(pagerState: PagerState, coroutineScope: CoroutineScope) {
-    if (pagerState.currentPage > 0) {
-        Text(
-            text = "<< Previous",
-            color = Color.Black,
-            modifier = Modifier.clickable {
-                coroutineScope.launch {
-                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                }
-            }
-        )
-    }
+fun OnboardingScreenPreview() {
+    OnboardingScreen()
 }
-
