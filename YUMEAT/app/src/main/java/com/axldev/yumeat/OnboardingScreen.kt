@@ -92,14 +92,14 @@ fun OnboardingScreen() {
                 ) {
                     Text(
                         text = pagerItems[page].first,
-                        fontSize = 24.sp,
+                        fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp),
                         textAlign = TextAlign.Center
                     )
                     Text(
                         text = pagerItems[page].second,
-                        fontSize = 14.sp,
+                        fontSize = 20.sp,
                         modifier = Modifier.padding(8.dp),
                         textAlign = TextAlign.Center
                     )
