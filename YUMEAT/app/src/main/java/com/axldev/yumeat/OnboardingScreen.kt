@@ -68,7 +68,7 @@ fun OnboardingScreen() {
         // Caja estática para el rectángulo naranja
         Box(
             modifier = Modifier
-                .padding(top = 40.dp)
+                .padding(top = 130.dp)
                 .clip(RoundedCornerShape(30.dp))
                 .background(
                     brush = Brush.linearGradient(
@@ -77,7 +77,7 @@ fun OnboardingScreen() {
                         end = Offset(600f, 800f) // Aumentamos el tamaño del área del degradado
                     )
                 )
-                .size(300.dp, 400.dp),
+                .size(350.dp, 500.dp),
             contentAlignment = Alignment.Center
         )  {
             // Implementación de HorizontalPager para el efecto de deslizar
@@ -114,8 +114,23 @@ fun OnboardingScreen() {
                 .padding(top = 16.dp, start = 32.dp, end = 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Botón Previous solo si no estamos en la primera página
             PreviousButton(pagerState, coroutineScope)
-            NextButton(pagerState, coroutineScope, pagerItems.size)
+
+            Spacer(modifier = Modifier.weight(1f)) // Espacio flexible para alinear los botones
+
+            // Botón Next solo si no estamos en la última página
+            if (pagerState.currentPage < pagerItems.size - 1) {
+                Text(
+                    text = "Next >>",
+                    color = Color.Black,
+                    modifier = Modifier.clickable {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
+                    }
+                )
+            }
         }
     }
 }
