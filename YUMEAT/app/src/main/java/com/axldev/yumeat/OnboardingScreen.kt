@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
@@ -70,13 +71,15 @@ fun OnboardingScreen() {
                 .padding(top = 40.dp)
                 .clip(RoundedCornerShape(30.dp))
                 .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFFFFA726), Color(0xFFFFC107))
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color(0xFFF0AE01), Color(0xFFFF6B00)), // Degradado diagonal
+                        start = Offset(0f, 0f),  // Arriba a la izquierda
+                        end = Offset(600f, 800f) // Aumentamos el tamaño del área del degradado
                     )
                 )
                 .size(300.dp, 400.dp),
             contentAlignment = Alignment.Center
-        ) {
+        )  {
             // Implementación de HorizontalPager para el efecto de deslizar
             HorizontalPager(
                 state = pagerState,
