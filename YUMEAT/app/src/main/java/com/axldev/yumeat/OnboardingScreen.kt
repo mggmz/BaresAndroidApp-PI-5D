@@ -28,7 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.zIndex
+import kotlinx.coroutines.launch
 
 // Crear FontFamily para Quicksand y Raleway
 val quicksandFont = FontFamily(Font(R.font.quicksand))
@@ -68,15 +68,15 @@ fun OnboardingScreen() {
                 text = "Get some food!",
                 fontSize = 18.sp,
                 fontStyle = FontStyle.Italic,
-                fontFamily = FontFamily.Serif,
+                fontFamily = ralewayFont,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            // Imagen que se superpone al recuadro
+            // Imagen que se superpone al recuadro (sin uso de zIndex)
             Box(
                 modifier = Modifier
                     .size(250.dp)
-                    .absoluteOffset(y = -5.dp)
+                    .absoluteOffset(y = (-50).dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.food_image),
@@ -103,8 +103,7 @@ fun OnboardingScreen() {
                                 start = Offset(0f, 0f),
                                 end = Offset(600f, 800f)
                             )
-                        )
-                        .zIndex(-1f),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     HorizontalPager(
@@ -133,14 +132,25 @@ fun OnboardingScreen() {
                     }
                 }
 
-                // Botón "Get Started" parcialmente superpuesto
+                // Botón que cambia de "Next" a "Get Started"
+                val isLastPage = pagerState.currentPage == pagerItems.size - 1
+                val buttonText = if (isLastPage) "Get Started" else "Next"
+
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .offset(y = 30.dp) // Ajusta este valor para controlar la superposición
                 ) {
                     Button(
-                        onClick = { /* Acción del botón Get Started */ },
+                        onClick = {
+                            coroutineScope.launch {
+                                if (isLastPage) {
+                                    // Acciones al presionar "Get Started", como cambiar de pantalla
+                                } else {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .height(60.dp)
                             .width(280.dp),
@@ -149,7 +159,7 @@ fun OnboardingScreen() {
                             containerColor = Color(0xFFFFC700)
                         )
                     ) {
-                        Text(text = "Get Started", color = Color.Black)
+                        Text(text = buttonText, color = Color.Black)
                     }
                 }
             }
