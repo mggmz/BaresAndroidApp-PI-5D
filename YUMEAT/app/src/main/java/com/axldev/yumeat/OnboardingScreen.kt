@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.zIndex
 
@@ -45,103 +46,112 @@ fun OnboardingScreen() {
     val pagerState = rememberPagerState(initialPage = 0) { pagerItems.size }
     val coroutineScope = rememberCoroutineScope()
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDE7)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .background(Color(0xFFFFFDE7))
     ) {
-        // Título y subtítulo
-        Text(
-            text = "YumEat",
-            fontSize = 50.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = quicksandFont,
-            modifier = Modifier.padding(top = 40.dp)
-        )
-        Text(
-            text = "Get some food!!",
-            fontSize = 20.sp,
-            fontFamily = ralewayFont,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-
-        // Imagen que se superpone al recuadro
-        Box(
-            modifier = Modifier
-                .size(250.dp)
-                .absoluteOffset(y = -5.dp)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.food_image),
-                contentDescription = "Food Image",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+            // Título y subtítulo
+            Text(
+                text = "YumEat",
+                fontSize = 50.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = quicksandFont,
+                modifier = Modifier.padding(top = 40.dp)
             )
-        }
+            Text(
+                text = "Get some food!",
+                fontSize = 18.sp,
+                fontStyle = FontStyle.Italic,
+                fontFamily = FontFamily.Serif,
+                modifier = Modifier.padding(top = 4.dp)
+            )
 
-        // Caja estática para el recuadro naranja
-        Box(
-            modifier = Modifier
-                .offset(y = (-100).dp)
-                .clip(RoundedCornerShape(30.dp))
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color(0xFFF0AE01), Color(0xFFFF6B00)),
-                        start = Offset(0f, 0f),
-                        end = Offset(600f, 800f)
-                    )
-                )
-                .size(350.dp, 500.dp)
-                .zIndex(-1f),
-            contentAlignment = Alignment.Center
-        ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = pagerItems[page].first,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = pagerItems[page].second,
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(8.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-
-        // Botón "Get Started" siempre visible
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .offset(y = (-40).dp), // Superposición ligera sobre el recuadro naranja
-            contentAlignment = Alignment.Center
-        ) {
-            Button(
-                onClick = { /* Acción del botón Get Started */ },
+            // Imagen que se superpone al recuadro
+            Box(
                 modifier = Modifier
-                    .height(60.dp)
-                    .width(180.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFC700)
-                )
+                    .size(250.dp)
+                    .absoluteOffset(y = -5.dp)
             ) {
-                Text(text = "Get Started!!", color = Color.Black)
+                Image(
+                    painter = painterResource(id = R.drawable.food_image),
+                    contentDescription = "Food Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            // Caja estática para el recuadro naranja y el botón superpuesto
+            Box(
+                modifier = Modifier
+                    .offset(y = (-100).dp)
+                    .size(350.dp, 530.dp) // Aumentamos la altura para acomodar el botón
+            ) {
+                // Recuadro naranja
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(Color(0xFFF0AE01), Color(0xFFFF6B00)),
+                                start = Offset(0f, 0f),
+                                end = Offset(600f, 800f)
+                            )
+                        )
+                        .zIndex(-1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = pagerItems[page].first,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = pagerItems[page].second,
+                                fontSize = 20.sp,
+                                modifier = Modifier.padding(8.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+
+                // Botón "Get Started" parcialmente superpuesto
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(y = 30.dp) // Ajusta este valor para controlar la superposición
+                ) {
+                    Button(
+                        onClick = { /* Acción del botón Get Started */ },
+                        modifier = Modifier
+                            .height(60.dp)
+                            .width(280.dp),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFC700)
+                        )
+                    ) {
+                        Text(text = "Get Started", color = Color.Black)
+                    }
+                }
             }
         }
     }
