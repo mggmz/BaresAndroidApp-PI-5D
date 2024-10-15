@@ -39,7 +39,6 @@ private val pagerItems = listOf(
     "Discover great deals" to "Find exclusive promotions for your favorite places to eat and drink.",
     "Enjoy the best restaurants" to "Experience the top-rated spots with the best food and service."
 )
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen() {
@@ -72,30 +71,18 @@ fun OnboardingScreen() {
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            // Imagen que se superpone al recuadro (sin uso de zIndex)
+            // Contenedor para la imagen, el recuadro naranja y el botón
             Box(
                 modifier = Modifier
-                    .size(250.dp)
-                    .absoluteOffset(y = (-50).dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.food_image),
-                    contentDescription = "Food Image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            // Caja estática para el recuadro naranja y el botón superpuesto
-            Box(
-                modifier = Modifier
-                    .offset(y = (-100).dp)
-                    .size(350.dp, 530.dp) // Aumentamos la altura para acomodar el botón
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(top = 20.dp)
             ) {
                 // Recuadro naranja
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(top = 100.dp, start = 16.dp, end = 16.dp)
                         .clip(RoundedCornerShape(30.dp))
                         .background(
                             brush = Brush.linearGradient(
@@ -103,8 +90,7 @@ fun OnboardingScreen() {
                                 start = Offset(0f, 0f),
                                 end = Offset(600f, 800f)
                             )
-                        ),
-                    contentAlignment = Alignment.Center
+                        )
                 ) {
                     HorizontalPager(
                         state = pagerState,
@@ -132,43 +118,43 @@ fun OnboardingScreen() {
                     }
                 }
 
-                // Botón que cambia de "Next" a "Get Started"
+                // Imagen superpuesta
+                Image(
+                    painter = painterResource(id = R.drawable.food_image),
+                    contentDescription = "Food Image",
+                    modifier = Modifier
+                        .size(250.dp)
+                        .align(Alignment.TopCenter),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Botón superpuesto
                 val isLastPage = pagerState.currentPage == pagerItems.size - 1
                 val buttonText = if (isLastPage) "Get Started" else "Next"
 
-                Box(
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            if (isLastPage) {
+                                // Acciones al presionar "Get Started", como cambiar de pantalla
+                            } else {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .offset(y = 30.dp) // Ajusta este valor para controlar la superposición
+                        .offset(y = 30.dp)
+                        .height(60.dp)
+                        .width(280.dp),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFFC700)
+                    )
                 ) {
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                if (isLastPage) {
-                                    // Acciones al presionar "Get Started", como cambiar de pantalla
-                                } else {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .height(60.dp)
-                            .width(280.dp),
-                        shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFFC700)
-                        )
-                    ) {
-                        Text(text = buttonText, color = Color.Black)
-                    }
+                    Text(text = buttonText, color = Color.Black)
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun OnboardingScreenPreview() {
-    OnboardingScreen()
 }
