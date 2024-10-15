@@ -24,20 +24,17 @@ fun AddEventScreen() {
     var startsAt by remember { mutableStateOf("") }
     var endsAt by remember { mutableStateOf("") }
 
-    // Scaffold para manejar el BottomAppBar
     Scaffold(
         bottomBar = {
             BottomAppBar(
                 backgroundColor = Color(0xFFE9E9E9)
             ) {
-                // Botón de navegación para Home con ícono
                 IconButton(onClick = { /* Lógica para ir a Home */ }) {
-                    Icon(Icons.Filled.Home, contentDescription = "Home") // Ícono para el botón Home
+                    Icon(Icons.Filled.Home, contentDescription = "Home")
                 }
-                Spacer(Modifier.weight(1f)) // Espacio flexible para centrar el botón
-                // Botón de navegación para Location con ícono
+                Spacer(Modifier.weight(1f))
                 IconButton(onClick = { /* Lógica para ir a Location */ }) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Location") // Ícono para el botón Location
+                    Icon(Icons.Filled.LocationOn, contentDescription = "Location")
                 }
             }
         }
@@ -49,7 +46,6 @@ fun AddEventScreen() {
                 .padding(16.dp)
                 .background(Color.White)
         ) {
-            // Título
             Text(
                 text = "Add Event",
                 fontSize = 24.sp,
@@ -59,7 +55,6 @@ fun AddEventScreen() {
                     .align(Alignment.CenterHorizontally)
             )
 
-            // Description Field
             Text(text = "Description", fontWeight = FontWeight.Bold)
             OutlinedTextField(
                 value = description,
@@ -69,7 +64,6 @@ fun AddEventScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Place/Address Field
             Text(text = "Place/Address", fontWeight = FontWeight.Bold)
             OutlinedTextField(
                 value = address,
@@ -79,39 +73,37 @@ fun AddEventScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Starts At Field
-            Text(text = "Starts At", fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = startsAt,
-                onValueChange = { startsAt = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text) // Cambia el tipo de teclado según sea necesario
-            )
+            // Row para "Starts at" y "Ends at"
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Starts at", fontWeight = FontWeight.Bold)
+                    OutlinedTextField(
+                        value = startsAt,
+                        onValueChange = { startsAt = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Ends at", fontWeight = FontWeight.Bold)
+                    OutlinedTextField(
+                        value = endsAt,
+                        onValueChange = { endsAt = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ends At Field
-            Text(text = "Ends At", fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = endsAt,
-                onValueChange = { endsAt = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text) // Cambia el tipo de teclado según sea necesario
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Image Upload Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Texto para agregar imágenes
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "Add Images")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Add Event Button
             Button(
                 onClick = { /* Lógica para agregar evento */ },
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0072A3)),

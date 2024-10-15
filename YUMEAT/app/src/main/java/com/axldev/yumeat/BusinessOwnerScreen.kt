@@ -24,14 +24,12 @@ fun BusinessOwnerScreen() {
             BottomAppBar(
                 //backgroundColor = Color(0xFFE9E9E9) // Color de fondo de la barra
             ) {
-                // Botón de navegación para Home
                 IconButton(onClick = { /* Lógica para ir a Home */ }) {
-                    Icon(Icons.Filled.Home, contentDescription = "Home") // Ícono para el botón Home
+                    Icon(Icons.Filled.Home, contentDescription = "Home")
                 }
-                Spacer(Modifier.weight(1f)) // Espacio flexible para centrar el botón
-                // Botón de navegación para Location
+                Spacer(Modifier.weight(1f))
                 IconButton(onClick = { /* Lógica para ir a Location */ }) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Location") // Ícono para el botón Location
+                    Icon(Icons.Filled.LocationOn, contentDescription = "Location")
                 }
             }
         },
@@ -42,7 +40,7 @@ fun BusinessOwnerScreen() {
                     .padding(innerPadding)
                     .padding(16.dp)
                     .background(Color.White),
-                verticalArrangement = Arrangement.SpaceBetween // Espacio entre elementos
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Encabezado
                 Text(
@@ -60,30 +58,45 @@ fun BusinessOwnerScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Menú de navegación
-                Row(
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier.fillMaxWidth()
+                // Menú de navegación con un rectángulo de esquinas redondeadas
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Transparent, shape = RoundedCornerShape(20.dp))
                 ) {
-                    Tab(
-                        selected = selectedTab == "Events",
-                        onClick = { selectedTab = "Events" },
-                        modifier = Modifier
-                            .background(if (selectedTab == "Events") Color(0xFFFFA500) else Color.Transparent)
-                            .padding(8.dp)
-                            .weight(1f),
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "Events", color = if (selectedTab == "Events") Color.White else Color.Black)
-                    }
-                    Tab(
-                        selected = selectedTab == "Offers",
-                        onClick = { selectedTab = "Offers" },
-                        modifier = Modifier
-                            .background(if (selectedTab == "Offers") Color(0xFFFFA500) else Color.Transparent)
-                            .padding(8.dp)
-                            .weight(1f),
-                    ) {
-                        Text(text = "Offers", color = if (selectedTab == "Offers") Color.White else Color.Black)
+                        TextButton(
+                            onClick = { selectedTab = "Events" },
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    color = if (selectedTab == "Events") Color(0xFFFFB36D) else Color(0xFFF5F5F5),
+                                    shape = RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp)
+                                ),
+                        ) {
+                            Text(
+                                text = "Events",
+                                color = if (selectedTab == "Events") Color.White else Color.Gray
+                            )
+                        }
+
+                        TextButton(
+                            onClick = { selectedTab = "Offers" },
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    color = if (selectedTab == "Offers") Color(0xFFFFB36D) else Color(0xFFF5F5F5),
+                                    shape = RoundedCornerShape(topEnd = 20.dp, bottomEnd = 20.dp)
+                                ),
+                        ) {
+                            Text(
+                                text = "Offers",
+                                color = if (selectedTab == "Offers") Color.White else Color.Gray
+                            )
+                        }
                     }
                 }
 
@@ -101,16 +114,15 @@ fun BusinessOwnerScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    contentAlignment = Alignment.Center // Centrar el botón
+                    contentAlignment = Alignment.Center
                 ) {
                     FloatingActionButton(
                         onClick = { /* Acción para agregar */ },
-                        modifier = Modifier
-                            .padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp),
                         shape = RoundedCornerShape(50),
-                        containerColor = Color.White // Color de fondo del botón
+                        containerColor = Color.White
                     ) {
-                        Text(text = "+", fontSize = 24.sp, color = Color(0xFF000000)) // Texto del botón
+                        Text(text = "+", fontSize = 24.sp, color = Color(0xFF000000))
                     }
                 }
             }
@@ -121,7 +133,6 @@ fun BusinessOwnerScreen() {
 @Composable
 fun EventList() {
     Column {
-        // Aquí puedes agregar las tarjetas de eventos
         repeat(2) { index ->
             EventCard(title = "Evento $index", place = "Lugar $index", date = "Fecha $index")
         }
@@ -131,7 +142,6 @@ fun EventList() {
 @Composable
 fun OfferList() {
     Column {
-        // Aquí puedes agregar las tarjetas de ofertas
         repeat(2) { index ->
             OfferCard(title = "Oferta $index", place = "Lugar $index", date = "Fecha $index")
         }
@@ -148,7 +158,6 @@ fun EventCard(title: String, place: String, date: String) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
-            // Espacio para imagen (placeholder)
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(text = title, fontWeight = FontWeight.Bold)
@@ -161,8 +170,7 @@ fun EventCard(title: String, place: String, date: String) {
 
 @Composable
 fun OfferCard(title: String, place: String, date: String) {
-    // Similar a EventCard pero para ofertas
-    EventCard(title, place, date) // Puedes reutilizar el mismo diseño o modificarlo.
+    EventCard(title, place, date)
 }
 
 @Composable
