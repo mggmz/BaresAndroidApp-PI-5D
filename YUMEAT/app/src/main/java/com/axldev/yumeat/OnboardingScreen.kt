@@ -57,18 +57,18 @@ fun OnboardingScreen() {
         ) {
             // Título y subtítulo
             Text(
-                text = "YumEat",
-                fontSize = 50.sp,
+                text = "Yum",
+                fontSize = 51.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = quicksandFont,
-                modifier = Modifier.padding(top = 40.dp)
+                modifier = Modifier.padding(top = 55.dp) // Espacio superior para el primer texto
             )
             Text(
-                text = "Get some food!",
-                fontSize = 18.sp,
-                fontStyle = FontStyle.Italic,
-                fontFamily = ralewayFont,
-                modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
+                text = "Eat",
+                fontSize = 51.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = quicksandFont,
+                modifier = Modifier.paddingFromBaseline(top = 0.dp) // Elimina el espacio extra entre las líneas
             )
 
             // Contenedor para la imagen, el recuadro naranja y el botón
@@ -147,7 +147,7 @@ fun OnboardingScreen() {
                     },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 235.dp)
+                        .padding(bottom = 200.dp)
                         .height(56.dp)
                         .width(200.dp),
                     shape = RoundedCornerShape(28.dp),
