@@ -68,7 +68,7 @@ fun OnboardingScreen() {
                 fontSize = 18.sp,
                 fontStyle = FontStyle.Italic,
                 fontFamily = ralewayFont,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
             )
 
             // Contenedor para la imagen, el recuadro naranja y el botón
@@ -76,13 +76,15 @@ fun OnboardingScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(top = 20.dp)
+                    .padding(horizontal = 16.dp)
             ) {
                 // Recuadro naranja
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 100.dp, start = 16.dp, end = 16.dp)
+                        .fillMaxWidth()
+                        .height(450.dp)
+                        .padding(top = 100.dp)
+
                         .clip(RoundedCornerShape(30.dp))
                         .background(
                             brush = Brush.linearGradient(
@@ -103,15 +105,15 @@ fun OnboardingScreen() {
                         ) {
                             Text(
                                 text = pagerItems[page].first,
-                                fontSize = 30.sp,
+                                fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 16.dp),
+                                modifier = Modifier.padding(bottom = 16.dp, top = 60.dp),
                                 textAlign = TextAlign.Center
                             )
                             Text(
                                 text = pagerItems[page].second,
-                                fontSize = 20.sp,
-                                modifier = Modifier.padding(8.dp),
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(horizontal = 8.dp),
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -123,12 +125,13 @@ fun OnboardingScreen() {
                     painter = painterResource(id = R.drawable.food_image),
                     contentDescription = "Food Image",
                     modifier = Modifier
-                        .size(250.dp)
+                        .size(200.dp)
+                        .offset(y = (-20).dp)
                         .align(Alignment.TopCenter),
                     contentScale = ContentScale.Crop
                 )
 
-                // Botón superpuesto
+                // Botón
                 val isLastPage = pagerState.currentPage == pagerItems.size - 1
                 val buttonText = if (isLastPage) "Get Started" else "Next"
 
@@ -144,10 +147,10 @@ fun OnboardingScreen() {
                     },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .offset(y = 30.dp)
-                        .height(60.dp)
-                        .width(280.dp),
-                    shape = RoundedCornerShape(30.dp),
+                        .padding(bottom = 235.dp)
+                        .height(56.dp)
+                        .width(200.dp),
+                    shape = RoundedCornerShape(28.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFFFC700)
                     )
