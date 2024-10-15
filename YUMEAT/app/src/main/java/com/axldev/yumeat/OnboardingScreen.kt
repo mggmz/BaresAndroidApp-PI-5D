@@ -84,7 +84,7 @@ fun OnboardingScreen() {
                         .fillMaxWidth()
                         .height(450.dp)
                         .padding(top = 100.dp)
-
+                        .padding(bottom = 1.dp)
                         .clip(RoundedCornerShape(30.dp))
                         .background(
                             brush = Brush.linearGradient(
@@ -107,7 +107,7 @@ fun OnboardingScreen() {
                                 text = pagerItems[page].first,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 16.dp, top = 60.dp),
+                                modifier = Modifier.padding(bottom = 20.dp, top = 1.dp),
                                 textAlign = TextAlign.Center
                             )
                             Text(
