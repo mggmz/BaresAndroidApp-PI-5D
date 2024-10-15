@@ -2,9 +2,8 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,8 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 
 @Composable
 fun AddEventScreen() {
@@ -24,15 +24,22 @@ fun AddEventScreen() {
     var startsAt by remember { mutableStateOf("") }
     var endsAt by remember { mutableStateOf("") }
 
-    // Scaffold to manage BottomAppBar
+    // Scaffold para manejar el BottomAppBar
     Scaffold(
         bottomBar = {
             BottomAppBar(
-                containerColor = Color(0xFFE9E9E9),
-                content = {
-                    // Aquí puedes agregar lógica para los botones de navegación si es necesario
+                backgroundColor = Color(0xFFE9E9E9)
+            ) {
+                // Botón de navegación para Home con ícono
+                IconButton(onClick = { /* Lógica para ir a Home */ }) {
+                    Icon(Icons.Filled.Home, contentDescription = "Home") // Ícono para el botón Home
                 }
-            )
+                Spacer(Modifier.weight(1f)) // Espacio flexible para centrar el botón
+                // Botón de navegación para Location con ícono
+                IconButton(onClick = { /* Lógica para ir a Location */ }) {
+                    Icon(Icons.Filled.LocationOn, contentDescription = "Location") // Ícono para el botón Location
+                }
+            }
         }
     ) { innerPadding ->
         Column(
@@ -100,23 +107,14 @@ fun AddEventScreen() {
             ) {
                 // Texto para agregar imágenes
                 Text(text = "Add Images")
-
-                // Ícono de clip de oficina
-                Image(
-                    painter = painterResource(id = R.drawable.ic_office_clip), // Cambia 'ic_office_clip' por el nombre de tu archivo
-                    contentDescription = "Office Clip Icon",
-                    modifier = Modifier
-                        .size(36.dp) // Tamaño del ícono
-                        .padding(start = 8.dp) // Espacio a la izquierda
-                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Add Event Button
             Button(
-                onClick = { /* Add Event logic */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0072A3)),
+                onClick = { /* Lógica para agregar evento */ },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0072A3)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
