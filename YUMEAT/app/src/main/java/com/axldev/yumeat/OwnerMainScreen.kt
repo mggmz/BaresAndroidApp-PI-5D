@@ -18,16 +18,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.axldev.yumeat.ui.theme.YUMEATTheme
-import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.Gray
-import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.navigation.NavController
 
 @Composable
-fun OwnerMainScreenContent() {
+fun OwnerMainScreenContent(navController: NavController) {
     Scaffold(
         bottomBar = {
             BottomAppBar(
@@ -45,7 +41,10 @@ fun OwnerMainScreenContent() {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add business logic */ },
+                onClick = {
+                    // Navigate to the AddBusinessScreen
+                    navController.navigate("add_business")
+                },
                 shape = CircleShape,
                 containerColor = Color(0xFF0072A3)
             ) {
@@ -121,8 +120,3 @@ fun OwnerMainScreenContent() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun OwnerMainScreenPreview() {
-    OwnerMainScreenContent()
-}
