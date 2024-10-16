@@ -19,7 +19,8 @@ class MainActivity : ComponentActivity() {
             ) {
                 // Define each screen and pass navController to handle navigation
                 composable("onboarding") { OnboardingScreen(navController) }
-                composable("register") { RegistroScreen(navController) }
+                composable("register") { RegisterScreen(navController) }
+
                 composable("owner_main") { OwnerMainScreenContent(navController) }
                 composable("add_business") { AddBusinessScreen() }  // Define the AddBusinessScreen route
             }
