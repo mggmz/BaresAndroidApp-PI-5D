@@ -12,12 +12,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController: NavHostController = rememberNavController()
-            NavHost(navController = navController, startDestination = "onboarding") {
+            val navController = rememberNavController()  // Create the NavHostController
+            NavHost(
+                navController = navController,
+                startDestination = "onboarding"  // Start at the OnboardingScreen
+            ) {
+                // Define each screen and pass navController to handle navigation
                 composable("onboarding") { OnboardingScreen(navController) }
-                composable("register") { RegisterScreen() }
+                composable("register") { RegistroScreen(navController) }
+                composable("owner_main") { OwnerMainScreenContent(navController) }
+                composable("add_business") { AddBusinessScreen() }  // Define the AddBusinessScreen route
             }
         }
     }
 }
+
 
