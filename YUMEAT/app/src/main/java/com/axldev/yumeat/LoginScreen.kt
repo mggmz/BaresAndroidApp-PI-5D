@@ -80,16 +80,11 @@ fun LoginScreen(navController: NavController) {
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            // Verificar el tipo de usuario
+                            // Obtener el usuario actual
                             val user = auth.currentUser
                             if (user != null) {
-                                // Si es un Business Owner, redirigir a OwnerMainScreen
-                                if (isBusinessOwner(user.email)) {
-                                    navController.navigate("owner_main")
-                                } else {
-                                    // Si es otro tipo de usuario, redirigir a otra pantalla
-                                    navController.navigate("user_home")
-                                }
+                                // Redirigir a OwnerMainScreen si el login es exitoso
+                                navController.navigate("owner_main")
                             }
                         } else {
                             // Mostrar error si la autenticación falla
@@ -108,10 +103,4 @@ fun LoginScreen(navController: NavController) {
             Text(text = "Don't have an account? Register", color = Color.Blue)
         }
     }
-}
-
-// Función temporal para verificar si el email pertenece a un Business Owner
-fun isBusinessOwner(email: String?): Boolean {
-    // Lógica para validar el correo, podría ser una lista de correos o un campo en la base de datos
-    return email?.endsWith("@businessowner.com") == true
 }
