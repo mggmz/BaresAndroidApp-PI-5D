@@ -26,8 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
 // Crear FontFamily para Quicksand y Raleway
@@ -39,9 +38,10 @@ private val pagerItems = listOf(
     "Discover great deals" to "Find exclusive promotions for your favorite places to eat and drink.",
     "Enjoy the best restaurants" to "Experience the top-rated spots with the best food and service."
 )
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen() {
+fun OnboardingScreen(navController: NavController) {
     val pagerState = rememberPagerState(initialPage = 0) { pagerItems.size }
     val coroutineScope = rememberCoroutineScope()
 
@@ -61,14 +61,14 @@ fun OnboardingScreen() {
                 fontSize = 51.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = quicksandFont,
-                modifier = Modifier.padding(top = 55.dp) // Espacio superior para el primer texto
+                modifier = Modifier.padding(top = 55.dp)
             )
             Text(
                 text = "Eat",
                 fontSize = 51.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = quicksandFont,
-                modifier = Modifier.paddingFromBaseline(top = 0.dp) // Elimina el espacio extra entre las líneas
+                modifier = Modifier.paddingFromBaseline(top = 0.dp)
             )
 
             // Contenedor para la imagen, el recuadro naranja y el botón
@@ -131,31 +131,28 @@ fun OnboardingScreen() {
                     contentScale = ContentScale.Crop
                 )
 
-                // Botón
+                // Botón "Get Started" solo en la última página
                 val isLastPage = pagerState.currentPage == pagerItems.size - 1
-                val buttonText = if (isLastPage) "Get Started" else "Next"
-
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            if (isLastPage) {
-                                // Acciones al presionar "Get Started", como cambiar de pantalla
-                            } else {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                if (isLastPage) {
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                // Navegar a la pantalla de registro
+                                navController.navigate("register")
                             }
-                        }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 200.dp)
-                        .height(56.dp)
-                        .width(200.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFC700)
-                    )
-                ) {
-                    Text(text = buttonText, color = Color.Black)
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 200.dp)
+                            .height(56.dp)
+                            .width(200.dp),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFC700)
+                        )
+                    ) {
+                        Text(text = "Get Started", color = Color.Black)
+                    }
                 }
             }
         }
