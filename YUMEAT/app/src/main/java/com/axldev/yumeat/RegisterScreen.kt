@@ -1,5 +1,6 @@
 package com.axldev.yumeat
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.font.FontWeight
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -25,6 +28,9 @@ fun RegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance() // Instancia de FirebaseAuth
 
     Column(
         modifier = Modifier
@@ -94,7 +100,22 @@ fun RegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { /* Acciones de registro */ }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {
+            if (email.isNotEmpty() && password == confirmPassword) {
+                // Crear usuario en Firebase Authentication
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(context, "Registration Successful", Toast.LENGTH_LONG).show()
+                            navController.navigate("login") // Redirige al login
+                        } else {
+                            Toast.makeText(context, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+            } else {
+                Toast.makeText(context, "Please verify your inputs", Toast.LENGTH_LONG).show()
+            }
+        }, modifier = Modifier.fillMaxWidth()) {
             Text(text = "Sign Up")
         }
 

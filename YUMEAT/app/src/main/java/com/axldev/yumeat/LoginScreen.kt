@@ -17,16 +17,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-
-
 import androidx.compose.ui.text.font.FontWeight
-
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) } // Para mostrar mensajes de error
+
+    val auth = FirebaseAuth.getInstance()
 
     Column(
         modifier = Modifier
@@ -68,7 +69,36 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { /* Acciones de login */ }, modifier = Modifier.fillMaxWidth()) {
+        // Mostrar mensaje de error si existe
+        errorMessage?.let {
+            Text(text = it, color = Color.Red)
+        }
+
+        // Botón de Login con autenticación
+        Button(
+            onClick = {
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Verificar el tipo de usuario
+                            val user = auth.currentUser
+                            if (user != null) {
+                                // Si es un Business Owner, redirigir a OwnerMainScreen
+                                if (isBusinessOwner(user.email)) {
+                                    navController.navigate("owner_main")
+                                } else {
+                                    // Si es otro tipo de usuario, redirigir a otra pantalla
+                                    navController.navigate("user_home")
+                                }
+                            }
+                        } else {
+                            // Mostrar error si la autenticación falla
+                            errorMessage = "Login failed: ${task.exception?.message}"
+                        }
+                    }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Login")
         }
 
@@ -78,4 +108,10 @@ fun LoginScreen(navController: NavController) {
             Text(text = "Don't have an account? Register", color = Color.Blue)
         }
     }
+}
+
+// Función temporal para verificar si el email pertenece a un Business Owner
+fun isBusinessOwner(email: String?): Boolean {
+    // Lógica para validar el correo, podría ser una lista de correos o un campo en la base de datos
+    return email?.endsWith("@businessowner.com") == true
 }
