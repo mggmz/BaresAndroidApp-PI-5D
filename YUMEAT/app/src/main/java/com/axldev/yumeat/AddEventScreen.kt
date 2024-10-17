@@ -55,41 +55,43 @@ fun AddEventScreen() {
                     .align(Alignment.CenterHorizontally)
             )
 
-            Text(text = "Description", fontWeight = FontWeight.Bold)
+            // Description Field
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
+                label = { Text("Description") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(text = "Place/Address", fontWeight = FontWeight.Bold)
+            // Place/Address Field
             OutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
+                label = { Text("Place/Address") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Row para "Starts at" y "Ends at"
+            // Row for "Starts at" and "Ends at"
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Starts at", fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = startsAt,
                         onValueChange = { startsAt = it },
+                        label = { Text("Starts at") },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Ends at", fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = endsAt,
                         onValueChange = { endsAt = it },
+                        label = { Text("Ends at") },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                     )
