@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.font.FontWeight
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -30,7 +29,6 @@ fun RegisterScreen(navController: NavController) {
     var passwordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance() // Instancia de FirebaseAuth
 
     Column(
         modifier = Modifier
@@ -102,16 +100,8 @@ fun RegisterScreen(navController: NavController) {
 
         Button(onClick = {
             if (email.isNotEmpty() && password == confirmPassword) {
-                // Crear usuario en Firebase Authentication
-                auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(context, "Registration Successful", Toast.LENGTH_LONG).show()
-                            navController.navigate("login") // Redirige al login
-                        } else {
-                            Toast.makeText(context, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                        }
-                    }
+                Toast.makeText(context, "Inputs Verified", Toast.LENGTH_LONG).show()
+                navController.navigate("login") // Redirige al login sin Firebase
             } else {
                 Toast.makeText(context, "Please verify your inputs", Toast.LENGTH_LONG).show()
             }
@@ -126,3 +116,4 @@ fun RegisterScreen(navController: NavController) {
         }
     }
 }
+

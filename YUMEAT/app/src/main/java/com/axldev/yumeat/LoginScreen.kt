@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.font.FontWeight
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -26,8 +25,6 @@ fun LoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) } // Para mostrar mensajes de error
-
-    val auth = FirebaseAuth.getInstance()
 
     Column(
         modifier = Modifier
@@ -74,23 +71,17 @@ fun LoginScreen(navController: NavController) {
             Text(text = it, color = Color.Red)
         }
 
-        // Botón de Login con autenticación
+        // Botón de Login
         Button(
             onClick = {
-                auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            // Obtener el usuario actual
-                            val user = auth.currentUser
-                            if (user != null) {
-                                // Redirigir a OwnerMainScreen si el login es exitoso
-                                navController.navigate("owner_main")
-                            }
-                        } else {
-                            // Mostrar error si la autenticación falla
-                            errorMessage = "Login failed: ${task.exception?.message}"
-                        }
-                    }
+                // Simulación de login (puedes adaptar la lógica según lo que necesites)
+                if (email.isNotEmpty() && password.isNotEmpty()) {
+                    // Simulación exitosa
+                    navController.navigate("owner_main")
+                } else {
+                    // Mostrar error
+                    errorMessage = "Please enter valid credentials"
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

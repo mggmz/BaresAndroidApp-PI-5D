@@ -65,9 +65,16 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(platform(libs.firebase.bom)) // Version actualizada de Firebase BOM
+
+    implementation(libs.firebase.auth) // Para autenticación
+
 
     // Esta línea permite usar FontWeight y otras propiedades de texto
     implementation("androidx.compose.ui:ui-text:1.7.3")
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.navigation.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
