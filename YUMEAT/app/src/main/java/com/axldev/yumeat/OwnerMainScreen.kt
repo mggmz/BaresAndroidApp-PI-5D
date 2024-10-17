@@ -73,59 +73,67 @@ fun OwnerMainScreenContent(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddBusinessClick,
-                shape = CircleShape,
-                containerColor = Color(0xFF0072A3)
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add Business", tint = Color.White)
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center
+        }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFFFFFFF))
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Yum Eat",
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            Text(
-                text = "Your Businesses",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Light,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Yum Eat",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+                Text(
+                    text = "Your Businesses",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Light,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                )
 
-            // Mostrar "Loading" mientras se cargan los negocios
-            if (loading) {
-                CircularProgressIndicator()
-            } else if (businesses.isEmpty()) {
-                Text(text = "You have no businesses", color = Color.Gray)
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp)
-                ) {
-                    items(businesses) { business ->
-                        BusinessCard(
-                            name = business["name"] as String,
-                            address = business["address"] as String,
-                            foodType = business["foodType"] as String
-                        )
+                // Mostrar "Loading" mientras se cargan los negocios
+                if (loading) {
+                    CircularProgressIndicator()
+                } else if (businesses.isEmpty()) {
+                    Text(text = "You have no businesses", color = Color.Gray)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        items(businesses) { business ->
+                            BusinessCard(
+                                name = business["name"] as String,
+                                address = business["address"] as String,
+                                foodType = business["foodType"] as String
+                            )
+                        }
                     }
                 }
+            }
+
+            // FloatingActionButton más grande y alineado a la derecha
+            FloatingActionButton(
+                onClick = onAddBusinessClick,
+                shape = CircleShape,
+                containerColor = Color(0xFF0072A3),
+                modifier = Modifier
+                    .size(100.dp)  // Aumentar el tamaño en un 10%
+                    .align(Alignment.BottomEnd)  // Alinearlo a la parte inferior derecha
+                    .padding(16.dp)  // Añadir padding para separarlo de los bordes
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Add Business", tint = Color.White)
             }
         }
     }
