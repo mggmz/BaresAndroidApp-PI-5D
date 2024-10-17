@@ -3,6 +3,9 @@ package com.axldev.yumeat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+// Importaciones adicionales
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -10,7 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,11 +23,42 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun OwnerMainScreenContent(
     onAddBusinessClick: () -> Unit
 ) {
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+
+    val currentUser = auth.currentUser
+    val userUID = currentUser?.uid
+
+    var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var loading by remember { mutableStateOf(true) }
+
+    // Para manejar la consulta en segundo plano
+    val coroutineScope = rememberCoroutineScope()
+
+    // Hacer la consulta a Firestore cuando se carga la pantalla
+    LaunchedEffect(userUID) {
+        if (userUID != null) {
+            db.collection("business")
+                .whereEqualTo("userUID", userUID)
+                .get()
+                .addOnSuccessListener { documents ->
+                    businesses = documents.map { it.data }
+                    loading = false
+                }
+                .addOnFailureListener {
+                    loading = false
+                }
+        }
+    }
+
     Scaffold(
         bottomBar = {
             BottomAppBar(
@@ -74,46 +108,65 @@ fun OwnerMainScreenContent(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Business Card with shadow
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .graphicsLayer {
-                        shadowElevation = 8.dp.toPx()
-                        shape = RoundedCornerShape(16.dp)
-                        clip = true
-                    }
-                    .background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(16.dp)
+            // Mostrar "Loading" mientras se cargan los negocios
+            if (loading) {
+                CircularProgressIndicator()
+            } else if (businesses.isEmpty()) {
+                Text(text = "You have no businesses", color = Color.Gray)
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.food_image),
-                        contentDescription = "Business Image",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .padding(bottom = 8.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                    Text(text = "Oasis Ocean Club", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text(
-                        text = "Calle Delfin 400, Club Santiago Manzanillo, Colima",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "4.7", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        // Add star icons or ratings UI here
+                    items(businesses) { business ->
+                        BusinessCard(
+                            name = business["name"] as String,
+                            address = business["address"] as String,
+                            foodType = business["foodType"] as String
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun BusinessCard(name: String, address: String, foodType: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .graphicsLayer {
+                shadowElevation = 8.dp.toPx()
+                shape = RoundedCornerShape(16.dp)
+                clip = true
+            }
+            .background(Color.White, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Imagen de ejemplo
+            Image(
+                painter = painterResource(id = R.drawable.food_image), // Reemplaza con un recurso de imagen adecuado
+                contentDescription = "Business Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .padding(bottom = 8.dp),
+                contentScale = ContentScale.Crop
+            )
+            Text(text = name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(
+                text = address,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+            Text(text = "Type: $foodType", fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
     }
 }

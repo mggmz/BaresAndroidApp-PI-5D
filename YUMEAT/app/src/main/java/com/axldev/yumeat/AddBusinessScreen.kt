@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 
@@ -33,6 +34,10 @@ fun AddBusinessScreen(
     val context = LocalContext.current
 
     val db = FirebaseFirestore.getInstance() // Instancia de Firebase Firestore
+    val auth = FirebaseAuth.getInstance() // Instancia de Firebase Auth
+
+    // Obtener el usuario autenticado
+    val currentUser = auth.currentUser
 
     Scaffold(
         bottomBar = {
@@ -117,24 +122,32 @@ fun AddBusinessScreen(
             Button(
                 onClick = {
                     if (name.isNotEmpty() && foodType.isNotEmpty() && address.isNotEmpty() && openAt.isNotEmpty() && closeAt.isNotEmpty()) {
-                        val business = hashMapOf(
-                            "name" to name,
-                            "foodType" to foodType,
-                            "address" to address,
-                            "openAt" to openAt,
-                            "closeAt" to closeAt
-                        )
+                        if (currentUser != null) {
+                            // Obtener el UID del usuario autenticado
+                            val userUID = currentUser.uid
 
-                        // Guardar en Firestore
-                        db.collection("business")
-                            .add(business)
-                            .addOnSuccessListener {
-                                Toast.makeText(context, "Business added successfully", Toast.LENGTH_SHORT).show()
-                                onBusinessAdded() // Acción después de agregar el negocio
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(context, "Error adding business: ${e.message}", Toast.LENGTH_SHORT).show()
-                            }
+                            val business = hashMapOf(
+                                "name" to name,
+                                "foodType" to foodType,
+                                "address" to address,
+                                "openAt" to openAt,
+                                "closeAt" to closeAt,
+                                "userUID" to userUID // Añadimos el UID del usuario
+                            )
+
+                            // Guardar en Firestore
+                            db.collection("business")
+                                .add(business)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Business added successfully", Toast.LENGTH_SHORT).show()
+                                    onBusinessAdded() // Acción después de agregar el negocio
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(context, "Error adding business: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        } else {
+                            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                     }
