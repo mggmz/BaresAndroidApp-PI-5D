@@ -19,17 +19,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
     onRegisterClick: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }  // Cambiado a username
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
 
     Column(
         modifier = Modifier
@@ -43,22 +45,22 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de email con autocompletado deshabilitado
+        // Campo de username en lugar de email
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.None,
+                capitalization = KeyboardCapitalization.Words,
                 autoCorrect = false,
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de contraseña con autocompletado deshabilitado
+        // Campo de contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -88,17 +90,30 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                if (email.isNotEmpty() && password.isNotEmpty()) {
-                    // Lógica para autenticación con Firebase
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                // Login exitoso
-                                onLoginClick(email, password)
+                if (username.isNotEmpty() && password.isNotEmpty()) {
+                    // Buscar el email correspondiente al username en Firestore
+                    db.collection("users").whereEqualTo("username", username).get()
+                        .addOnSuccessListener { documents ->
+                            if (!documents.isEmpty) {
+                                val email = documents.documents[0].getString("email") ?: ""
+                                // Iniciar sesión con el email obtenido
+                                auth.signInWithEmailAndPassword(email, password)
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            // Login exitoso
+                                            onLoginClick(email, password)
+                                        } else {
+                                            // Error de autenticación
+                                            errorMessage = task.exception?.message ?: "Login failed"
+                                        }
+                                    }
                             } else {
-                                // Error de autenticación
-                                errorMessage = task.exception?.message ?: "Login failed"
+                                // Username no encontrado
+                                errorMessage = "Username not found"
                             }
+                        }
+                        .addOnFailureListener {
+                            errorMessage = "Error searching for username"
                         }
                 } else {
                     errorMessage = "Please enter valid credentials"

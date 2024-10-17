@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +30,8 @@ import kotlinx.coroutines.tasks.await
 
 @Composable
 fun OwnerMainScreenContent(
-    onAddBusinessClick: () -> Unit
+    onAddBusinessClick: () -> Unit,
+    onLogoutClick: () -> Unit  // Parámetro para redirigir a la pantalla de login después de cerrar sesión
 ) {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -93,12 +95,30 @@ fun OwnerMainScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Yum Eat",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
+
+                // Botón de cerrar sesión en la parte superior izquierda
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            auth.signOut()
+                            onLogoutClick()  // Redirigir al LoginScreen después de cerrar sesión
+                        },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
+                    }
+
+                    Text(
+                        text = "Yum Eat",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        modifier = Modifier.padding(start = 84.dp, top = 30.dp)
+                    )
+                }
+
                 Text(
                     // Muestra el username o "Your" si no está disponible
                     text = "$username Businesses",

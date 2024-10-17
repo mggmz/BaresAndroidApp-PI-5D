@@ -44,6 +44,10 @@ class MainActivity : ComponentActivity() {
                     RegisterScreen(
                         onRegisterClick = { email, password, username ->
                             authViewModel.registerUser(email, password, username)
+                            // Después de registrarse, redirigir al LoginScreen
+                            navController.navigate("login") {
+                                popUpTo("register") { inclusive = true }
+                            }
                         },
                         onLoginClick = {
                             navController.navigate("login")
@@ -55,9 +59,8 @@ class MainActivity : ComponentActivity() {
                 composable("login") {
                     LoginScreen(
                         onLoginClick = { email, password ->
-                            // Intentar login
                             authViewModel.loginUser(email, password)
-                            // Verificar si el login fue exitoso (currentUser no es null)
+                            // Verificar si el login fue exitoso
                             if (authViewModel.currentUser.value != null) {
                                 // Redirigir a la pantalla principal del owner
                                 navController.navigate("owner_main") {
@@ -76,6 +79,13 @@ class MainActivity : ComponentActivity() {
                     OwnerMainScreenContent(
                         onAddBusinessClick = {
                             navController.navigate("add_business")
+                        },
+                        onLogoutClick = {
+                            // Cerrar sesión y redirigir al LoginScreen
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
                         }
                     )
                 }
