@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
 
 @Composable
 fun RegisterScreen(
@@ -76,6 +77,7 @@ fun RegisterScreen(
             onClick = {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
                     onRegisterClick(email, password)
+                    onLoginClick() // Redirigir al login después del registro exitoso
                 } else {
                     errorMessage = "Please enter valid credentials"
                 }

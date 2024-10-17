@@ -16,8 +16,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.compose.ui.text.font.FontWeight
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
@@ -28,6 +28,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     Column(
         modifier = Modifier
@@ -76,7 +77,17 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    onLoginClick(email, password)
+                    // Lógica para autenticación con Firebase
+                    auth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Login exitoso
+                                onLoginClick(email, password)
+                            } else {
+                                // Error de autenticación
+                                errorMessage = task.exception?.message ?: "Login failed"
+                            }
+                        }
                 } else {
                     errorMessage = "Please enter valid credentials"
                 }
