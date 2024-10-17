@@ -21,9 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: (String, String) -> Unit,
+    onRegisterClick: (String, String, String) -> Unit,  // Ahora incluye username
     onLoginClick: () -> Unit
 ) {
+    var username by remember { mutableStateOf("") }  // Estado para el username
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -41,7 +42,22 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de email con autocompletado deshabilitado
+        // Campo de username
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                autoCorrect = false,
+                keyboardType = KeyboardType.Text
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Campo de email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -56,7 +72,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de contraseña con autocompletado deshabilitado
+        // Campo de contraseña
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -86,11 +102,11 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                if (email.isNotEmpty() && password.isNotEmpty()) {
-                    onRegisterClick(email, password)
-                    onLoginClick() // Redirigir al login después del registro exitoso
+                if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+                    onRegisterClick(username, email, password)  // Ahora incluye username
+                    onLoginClick()  // Redirigir al login después del registro exitoso
                 } else {
-                    errorMessage = "Please enter valid credentials"
+                    errorMessage = "Please fill in all fields"
                 }
             },
             modifier = Modifier.fillMaxWidth()

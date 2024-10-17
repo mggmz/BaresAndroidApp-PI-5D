@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun OwnerMainScreenContent(
@@ -35,24 +36,31 @@ fun OwnerMainScreenContent(
 
     val currentUser = auth.currentUser
     val userUID = currentUser?.uid
-    val userEmail = currentUser?.email ?: "Your"  // Si no hay email disponible, se muestra "Your"
 
+    var username by remember { mutableStateOf<String?>("@Your") }  // Estado para el username
     var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
     var loading by remember { mutableStateOf(true) }
 
     // Para manejar la consulta en segundo plano
     LaunchedEffect(userUID) {
         if (userUID != null) {
-            db.collection("business")
-                .whereEqualTo("userUID", userUID)
-                .get()
-                .addOnSuccessListener { documents ->
-                    businesses = documents.map { it.data }
-                    loading = false
-                }
-                .addOnFailureListener {
-                    loading = false
-                }
+            try {
+                // Obtener el username desde Firestore
+                val userDoc = db.collection("users").document(userUID).get().await()
+                username = userDoc.getString("username")?.let { "@$it" } ?: "@Your"
+
+                // Obtener los negocios del usuario
+                val businessDocs = db.collection("business")
+                    .whereEqualTo("userUID", userUID)
+                    .get()
+                    .await()
+
+                businesses = businessDocs.map { it.data }
+                loading = false
+            } catch (e: Exception) {
+                loading = false
+                // Manejo de errores si es necesario
+            }
         }
     }
 
@@ -92,8 +100,8 @@ fun OwnerMainScreenContent(
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
                 Text(
-                    // Muestra el correo del usuario o "Your" si no está disponible
-                    text = "$userEmail Businesses",
+                    // Muestra el username o "Your" si no está disponible
+                    text = "$username Businesses",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,
