@@ -1,6 +1,8 @@
+# 🍜 YumEat
 
 # 🍜 YumEat
 
+**YumEat** is a mobile application developed for Android using Kotlin. The app serves as a platform to compare offers and announcements from nearby bars based on the user's location, with a focus on coastal areas. Whether you're looking for the best deals, live music events, or just want to explore the local bar scene, DrinksTime is your go-to app for discovering and comparing what's on offer.
 **YumEat** is a mobile application developed for Android using Kotlin. The app serves as a platform to compare offers and announcements from nearby bars based on the user's location, with a focus on coastal areas. Whether you're looking for the best deals, live music events, or just want to explore the local bar scene, DrinksTime is your go-to app for discovering and comparing what's on offer.
 
 ## 🎯 Project Overview
@@ -8,9 +10,12 @@
 ### Purpose
 
 The primary goal of YumEat is to enhance the eating and nightlife experience by providing users with up-to-date information about pubs and restaurants near their location, particularly in coastal regions. The app features filters to compare these based on user's preferences. Users can view details such as operating hours, promotions, live events, and menus. 
+The primary goal of YumEat is to enhance the eating and nightlife experience by providing users with up-to-date information about pubs and restaurants near their location, particularly in coastal regions. The app features filters to compare these based on user's preferences. Users can view details such as operating hours, promotions, live events, and menus. 
 
 ### Key Features
 
+- **Location-Based Recommendations**: Find pubs and restaurants based on your current location.
+- **Special Events**: Get information about special events (promotions, live music, etc.)
 - **Location-Based Recommendations**: Find pubs and restaurants based on your current location.
 - **Special Events**: Get information about special events (promotions, live music, etc.)
 - **User Roles**: 
