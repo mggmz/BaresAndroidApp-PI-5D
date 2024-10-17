@@ -20,11 +20,14 @@ import androidx.navigation.NavController
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    onLoginClick: (String, String) -> Unit,
+    onRegisterClick: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) } // Para mostrar mensajes de error
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -66,20 +69,15 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar mensaje de error si existe
         errorMessage?.let {
             Text(text = it, color = Color.Red)
         }
 
-        // Botón de Login
         Button(
             onClick = {
-                // Simulación de login (puedes adaptar la lógica según lo que necesites)
                 if (email.isNotEmpty() && password.isNotEmpty()) {
-                    // Simulación exitosa
-                    navController.navigate("owner_main")
+                    onLoginClick(email, password)
                 } else {
-                    // Mostrar error
                     errorMessage = "Please enter valid credentials"
                 }
             },
@@ -90,7 +88,7 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(onClick = { navController.navigate("register") }) {
+        TextButton(onClick = onRegisterClick) {
             Text(text = "Don't have an account? Register", color = Color.Blue)
         }
     }

@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
 // Crear FontFamily para Quicksand y Raleway
@@ -41,7 +40,7 @@ private val pagerItems = listOf(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen(navController: NavController) {
+fun OnboardingScreen(onFinish: () -> Unit) {
     val pagerState = rememberPagerState(initialPage = 0) { pagerItems.size }
     val coroutineScope = rememberCoroutineScope()
 
@@ -137,8 +136,7 @@ fun OnboardingScreen(navController: NavController) {
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                // Navegar a la pantalla de registro
-                                navController.navigate("register")
+                                onFinish()
                             }
                         },
                         modifier = Modifier

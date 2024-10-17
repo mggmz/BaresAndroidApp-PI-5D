@@ -20,10 +20,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 
 @Composable
-fun OwnerMainScreenContent(navController: NavController) {
+fun OwnerMainScreenContent(
+    onAddBusinessClick: () -> Unit
+) {
     Scaffold(
         bottomBar = {
             BottomAppBar(
@@ -41,10 +42,7 @@ fun OwnerMainScreenContent(navController: NavController) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    // Navigate to the AddBusinessScreen
-                    navController.navigate("add_business")
-                },
+                onClick = onAddBusinessClick,
                 shape = CircleShape,
                 containerColor = Color(0xFF0072A3)
             ) {
@@ -81,8 +79,8 @@ fun OwnerMainScreenContent(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .graphicsLayer { // Adding shadow effect
-                        shadowElevation = 8.dp.toPx() // Shadow elevation
+                    .graphicsLayer {
+                        shadowElevation = 8.dp.toPx()
                         shape = RoundedCornerShape(16.dp)
                         clip = true
                     }
@@ -94,7 +92,7 @@ fun OwnerMainScreenContent(navController: NavController) {
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.food_image), // replace with actual image resource
+                        painter = painterResource(id = R.drawable.food_image),
                         contentDescription = "Business Image",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -119,4 +117,3 @@ fun OwnerMainScreenContent(navController: NavController) {
         }
     }
 }
-
