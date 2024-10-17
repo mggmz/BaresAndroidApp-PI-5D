@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     OnboardingScreen(
                         onFinish = {
                             // Navega siempre a la pantalla de registro o login tras el onboarding
-                            navController.navigate("register") {
+                            navController.navigate("login") {
                                 popUpTo("onboarding") { inclusive = true }
                             }
                         }
