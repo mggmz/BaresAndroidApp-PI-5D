@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.launch
 
 @Composable
 fun OwnerMainScreenContent(
@@ -36,14 +35,12 @@ fun OwnerMainScreenContent(
 
     val currentUser = auth.currentUser
     val userUID = currentUser?.uid
+    val userEmail = currentUser?.email ?: "Your"  // Si no hay email disponible, se muestra "Your"
 
     var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
     var loading by remember { mutableStateOf(true) }
 
     // Para manejar la consulta en segundo plano
-    val coroutineScope = rememberCoroutineScope()
-
-    // Hacer la consulta a Firestore cuando se carga la pantalla
     LaunchedEffect(userUID) {
         if (userUID != null) {
             db.collection("business")
@@ -95,7 +92,8 @@ fun OwnerMainScreenContent(
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
                 Text(
-                    text = "Your Businesses",
+                    // Muestra el correo del usuario o "Your" si no está disponible
+                    text = "$userEmail Businesses",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.Gray,
