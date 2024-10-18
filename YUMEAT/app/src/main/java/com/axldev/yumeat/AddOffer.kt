@@ -3,7 +3,6 @@ package com.axldev.yumeat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
@@ -12,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
@@ -68,41 +66,49 @@ fun AddOfferScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
                 .background(Color.White)
         ) {
-            Text(
-                text = "Add Offer",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Add Offer",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(bottom = 12.dp, top = 28.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
 
-            // Offer Name Field
-            OutlinedTextField(
-                value = offerName,
-                onValueChange = { offerName = it },
-                label = { Text("Offer Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                // Offer Name Field
+                OutlinedTextField(
+                    value = offerName,
+                    onValueChange = { offerName = it },
+                    label = { Text("Offer Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Offer Details Field
-            OutlinedTextField(
-                value = offerDetails,
-                onValueChange = { offerDetails = it },
-                label = { Text("Offer Details") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                // Offer Details Field
+                OutlinedTextField(
+                    value = offerDetails,
+                    onValueChange = { offerDetails = it },
+                    label = { Text("Offer Details") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-            // Add Offer Button
+            // Botón en la parte inferior de la pantalla
             Button(
                 onClick = {
                     if (offerName.isNotEmpty() && offerDetails.isNotEmpty()) {
@@ -132,6 +138,8 @@ fun AddOfferScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0072A3)),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .align(Alignment.BottomCenter)  // Alinea el botón en la parte inferior
+                    .padding(16.dp)
                     .height(48.dp)
             ) {
                 Text(text = "Add Offer", color = Color.White)

@@ -1,5 +1,6 @@
 package com.axldev.yumeat
 
+import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,8 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.viewinterop.AndroidView
+import java.util.*
 
 @Composable
 fun AddEventScreen(
@@ -36,6 +39,17 @@ fun AddEventScreen(
     val auth = FirebaseAuth.getInstance()
 
     val currentUser = auth.currentUser
+
+    // Instancia del calendario para DatePicker
+    val calendar = Calendar.getInstance()
+    var selectedYear by remember { mutableStateOf(calendar.get(Calendar.YEAR)) }
+    var selectedMonth by remember { mutableStateOf(calendar.get(Calendar.MONTH)) }
+    var selectedDay by remember { mutableStateOf(calendar.get(Calendar.DAY_OF_MONTH)) }
+
+    // Función para actualizar la fecha seleccionada
+    fun updateSelectedDate(year: Int, month: Int, day: Int) {
+        eventDate = "$day/${month + 1}/$year"
+    }
 
     Scaffold(
         bottomBar = {
@@ -80,7 +94,9 @@ fun AddEventScreen(
                 text = "Add Event",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier
+                    .padding(bottom = 12.dp, top = 24.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
             // Event Name Field
@@ -103,12 +119,27 @@ fun AddEventScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Event Date Field
+            // Event Date Field (solo placeholder)
             OutlinedTextField(
                 value = eventDate,
                 onValueChange = { eventDate = it },
-                label = { Text("Event Date") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Select Date") },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true
+            )
+
+            // Mostrar el DatePicker fijo debajo del campo de fecha
+            Spacer(modifier = Modifier.height(16.dp))
+            DatePickerView(
+                year = selectedYear,
+                month = selectedMonth,
+                day = selectedDay,
+                onDateChange = { year, month, day ->
+                    selectedYear = year
+                    selectedMonth = month
+                    selectedDay = day
+                    updateSelectedDate(year, month, day)
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -150,4 +181,28 @@ fun AddEventScreen(
             }
         }
     }
+}
+
+@Composable
+fun DatePickerView(
+    year: Int,
+    month: Int,
+    day: Int,
+    onDateChange: (Int, Int, Int) -> Unit
+) {
+    val calendar = Calendar.getInstance()
+
+    // Usar DatePickerView nativo de Android para mostrar un calendario
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp),
+        factory = { context ->
+            DatePicker(context).apply {
+                init(year, month, day) { _, selectedYear, selectedMonth, selectedDay ->
+                    onDateChange(selectedYear, selectedMonth, selectedDay)
+                }
+            }
+        }
+    )
 }
