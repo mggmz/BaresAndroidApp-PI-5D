@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun BusinessOwnerScreen(
@@ -160,12 +162,12 @@ fun BusinessOwnerScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-//                // Lista de eventos u ofertas
-//                if (selectedTab == "Events") {
-//                    EventList()
-//                } else {
-//                    OfferList()
-//                }
+                // Lista de eventos u ofertas
+                if (selectedTab == "Events") {
+                    EventList()
+                } else {
+                    OfferList()
+                }
             }
 
             // FloatingActionButton para agregar eventos u ofertas
@@ -182,4 +184,63 @@ fun BusinessOwnerScreen(
             }
         }
     }
+}
+
+@Composable
+fun EventList() {
+    val db = FirebaseFirestore.getInstance()
+    val events = remember { mutableStateOf(listOf<Map<String, String>>()) }
+
+    LaunchedEffect(Unit) {
+        val eventDocs = db.collection("events").get().await()
+        events.value = eventDocs.documents.map { it.data as Map<String, String> }
+    }
+
+    Column {
+        events.value.forEach { event ->
+            EventCard(title = event["eventName"] ?: "No Title", place = event["eventLocation"] ?: "No Location", date = event["eventDate"] ?: "No Date")
+        }
+    }
+}
+
+@Composable
+fun OfferList() {
+    val db = FirebaseFirestore.getInstance()
+    val offers = remember { mutableStateOf(listOf<Map<String, String>>()) }
+
+    LaunchedEffect(Unit) {
+        val offerDocs = db.collection("offers").get().await()
+        offers.value = offerDocs.documents.map { it.data as Map<String, String> }
+    }
+
+    Column {
+        offers.value.forEach { offer ->
+            OfferCard(title = offer["offerName"] ?: "No Title", place = offer["offerDetails"] ?: "No Details", date = "")
+        }
+    }
+}
+
+@Composable
+fun EventCard(title: String, place: String, date: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(text = title, fontWeight = FontWeight.Bold)
+                Text(text = place, color = Color.Gray)
+                Text(text = date, color = Color.Gray)
+            }
+        }
+    }
+}
+
+@Composable
+fun OfferCard(title: String, place: String, date: String) {
+    EventCard(title, place, date) // Reutiliza el diseño de EventCard.
 }
