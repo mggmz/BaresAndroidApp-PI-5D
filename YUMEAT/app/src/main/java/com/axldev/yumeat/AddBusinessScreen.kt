@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,10 +20,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun AddBusinessScreen(
-    onBusinessAdded: () -> Unit
+    onBusinessAdded: () -> Unit,
+    onNavigateToHome: () -> Unit,  // Parámetro para navegar a Home
+    onNavigateToOffers: () -> Unit // Parámetro para navegar a la pantalla de ofertas
 ) {
     var name by remember { mutableStateOf("") }
     var foodType by remember { mutableStateOf("") }
@@ -32,27 +34,41 @@ fun AddBusinessScreen(
     var openAt by remember { mutableStateOf("") }
     var closeAt by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
 
-    val db = FirebaseFirestore.getInstance() // Instancia de Firebase Firestore
-    val auth = FirebaseAuth.getInstance() // Instancia de Firebase Auth
-
-    // Obtener el usuario autenticado
     val currentUser = auth.currentUser
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                containerColor = Color(0xFFE9E9E9),
-                content = {
-                    IconButton(onClick = { /* Home logic */ }) {
-                        Icon(Icons.Filled.Home, contentDescription = "Home")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onNavigateToHome,  // Navega al Home cuando se presiona el botón
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
                     }
-                    Spacer(Modifier.weight(1f))
-                    IconButton(onClick = { /* Navigate logic */ }) {
-                        Icon(Icons.Filled.Place, contentDescription = "Location")
+                    IconButton(
+                        onClick = onNavigateToOffers,  // Navega a la pantalla de ofertas
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
                     }
                 }
-            )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -123,24 +139,20 @@ fun AddBusinessScreen(
                 onClick = {
                     if (name.isNotEmpty() && foodType.isNotEmpty() && address.isNotEmpty() && openAt.isNotEmpty() && closeAt.isNotEmpty()) {
                         if (currentUser != null) {
-                            // Obtener el UID del usuario autenticado
                             val userUID = currentUser.uid
-
                             val business = hashMapOf(
                                 "name" to name,
                                 "foodType" to foodType,
                                 "address" to address,
                                 "openAt" to openAt,
                                 "closeAt" to closeAt,
-                                "userUID" to userUID // Añadimos el UID del usuario
+                                "userUID" to userUID
                             )
-
-                            // Guardar en Firestore
                             db.collection("business")
                                 .add(business)
                                 .addOnSuccessListener {
                                     Toast.makeText(context, "Business added successfully", Toast.LENGTH_SHORT).show()
-                                    onBusinessAdded() // Acción después de agregar el negocio
+                                    onBusinessAdded()
                                 }
                                 .addOnFailureListener { e ->
                                     Toast.makeText(context, "Error adding business: ${e.message}", Toast.LENGTH_SHORT).show()

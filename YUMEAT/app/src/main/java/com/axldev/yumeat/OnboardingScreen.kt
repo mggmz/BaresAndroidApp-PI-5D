@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -24,7 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.launch
 
@@ -54,20 +55,14 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            // Título y subtítulo
-            Text(
-                text = "Yum",
-                fontSize = 51.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = quicksandFont,
-                modifier = Modifier.padding(top = 55.dp)
-            )
-            Text(
-                text = "Eat",
-                fontSize = 51.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = quicksandFont,
-                modifier = Modifier.paddingFromBaseline(top = 0.dp)
+            // Reemplazar el texto por la imagen del logo
+            Image(
+                painter = painterResource(id = R.drawable.applogo),
+                contentDescription = "YumEat Logo",
+                modifier = Modifier
+                    .size(200.dp)
+                    .padding(top = 55.dp),
+                contentScale = ContentScale.Fit
             )
 
             // Contenedor para la imagen, el recuadro naranja y el botón

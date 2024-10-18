@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
                 composable("onboarding") {
                     OnboardingScreen(
                         onFinish = {
-                            // Navega siempre a la pantalla de registro o login tras el onboarding
                             navController.navigate("login") {
                                 popUpTo("onboarding") { inclusive = true }
                             }
@@ -44,7 +43,6 @@ class MainActivity : ComponentActivity() {
                     RegisterScreen(
                         onRegisterClick = { email, password, username ->
                             authViewModel.registerUser(email, password, username)
-                            // Después de registrarse, redirigir al LoginScreen
                             navController.navigate("login") {
                                 popUpTo("register") { inclusive = true }
                             }
@@ -60,9 +58,7 @@ class MainActivity : ComponentActivity() {
                     LoginScreen(
                         onLoginClick = { email, password ->
                             authViewModel.loginUser(email, password)
-                            // Verificar si el login fue exitoso
                             if (authViewModel.currentUser.value != null) {
-                                // Redirigir a la pantalla principal del owner
                                 navController.navigate("owner_main") {
                                     popUpTo("login") { inclusive = true }
                                 }
@@ -80,8 +76,10 @@ class MainActivity : ComponentActivity() {
                         onAddBusinessClick = {
                             navController.navigate("add_business")
                         },
+                        onAddOfferClick = {
+                            navController.navigate("business_owner")  // Agregado para ir a la pantalla de BusinessOwnerScreen
+                        },
                         onLogoutClick = {
-                            // Cerrar sesión y redirigir al LoginScreen
                             authViewModel.logOut()
                             navController.navigate("login") {
                                 popUpTo("owner_main") { inclusive = true }
@@ -95,9 +93,40 @@ class MainActivity : ComponentActivity() {
                     AddBusinessScreen(
                         onBusinessAdded = {
                             navController.popBackStack()
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") // Redirige a la pantalla de Owner Main
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") // Redirige a la pantalla de Business Owner
                         }
                     )
                 }
+
+                // Pantalla de BusinessOwnerScreen para ofertas y eventos
+                composable("business_owner") {
+                    BusinessOwnerScreen(
+                        onAddEventClick = {
+                            // Acciones para agregar un evento
+                        },
+                        onAddOfferClick = {
+                            // Acciones para agregar una oferta
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            // Navegar de vuelta al OwnerMainScreen
+                            navController.navigate("owner_main") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
             }
         }
 

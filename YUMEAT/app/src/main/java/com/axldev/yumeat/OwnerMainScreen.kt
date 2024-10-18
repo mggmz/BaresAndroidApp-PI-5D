@@ -11,12 +11,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -31,6 +32,7 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun OwnerMainScreenContent(
     onAddBusinessClick: () -> Unit,
+    onAddOfferClick: () -> Unit,  // Agregado para manejar el clic en el ícono de la etiqueta
     onLogoutClick: () -> Unit  // Parámetro para redirigir a la pantalla de login después de cerrar sesión
 ) {
     val auth = FirebaseAuth.getInstance()
@@ -49,7 +51,7 @@ fun OwnerMainScreenContent(
             try {
                 // Obtener el username desde Firestore
                 val userDoc = db.collection("users").document(userUID).get().await()
-                username = userDoc.getString("username")?.let { "@$it" } ?: "@Your"
+                username = userDoc.getString("username")?.let { "@$it's" } ?: "@Your"
 
                 // Obtener los negocios del usuario
                 val businessDocs = db.collection("business")
@@ -68,18 +70,42 @@ fun OwnerMainScreenContent(
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                containerColor = Color(0xFFE9E9E9),
-                content = {
-                    IconButton(onClick = { /* Home logic */ }) {
-                        Icon(Icons.Filled.Home, contentDescription = "Home")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { /* Acción para Home */ },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Home",
+                            tint = Color.Gray
+                        )
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-                    IconButton(onClick = { /* Location logic */ }) {
-                        Icon(Icons.Filled.Place, contentDescription = "Location")
+                    IconButton(
+                        onClick = onAddOfferClick,  // Usar el parámetro aquí para la navegación
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.LocalOffer,
+                            contentDescription = "Offers",
+                            tint = Color.Gray
+                        )
                     }
                 }
-            )
+            }
         }
     ) { innerPadding ->
         Box(
@@ -107,15 +133,20 @@ fun OwnerMainScreenContent(
                             onLogoutClick()  // Redirigir al LoginScreen después de cerrar sesión
                         },
                         modifier = Modifier.align(Alignment.CenterVertically)
+                            .padding(top = 10.dp),
+
                     ) {
                         Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
                     }
 
-                    Text(
-                        text = "Yum Eat",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 28.sp,
-                        modifier = Modifier.padding(start = 84.dp, top = 30.dp)
+                    // Imagen del logo en lugar de texto "Yum Eat"
+                    Image(
+                        painter = painterResource(id = R.drawable.applogo), // Asegúrate de que el logo esté en la carpeta drawable
+                        contentDescription = "Yum Eat Logo",
+                        modifier = Modifier
+                            .size(225.dp)
+                            .padding(start = 70.dp, top = 0.dp),
+                        contentScale = ContentScale.Fit
                     )
                 }
 
