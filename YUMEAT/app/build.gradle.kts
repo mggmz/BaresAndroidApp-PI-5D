@@ -70,6 +70,10 @@ dependencies {
 
     implementation(libs.firebase.auth) // Para autenticación
 
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.coil.compose)
+
+
 
     // Esta línea permite usar FontWeight y otras propiedades de texto
     implementation("androidx.compose.ui:ui-text:1.7.3")

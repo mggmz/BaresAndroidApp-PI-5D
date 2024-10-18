@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
@@ -95,7 +96,7 @@ fun OwnerMainScreenContent(
                         )
                     }
                     IconButton(
-                        onClick = onAddOfferClick,  // Usar el parámetro aquí para la navegación
+                        onClick = onAddOfferClick,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
@@ -133,8 +134,7 @@ fun OwnerMainScreenContent(
                             onLogoutClick()  // Redirigir al LoginScreen después de cerrar sesión
                         },
                         modifier = Modifier.align(Alignment.CenterVertically)
-                            .padding(top = 10.dp),
-
+                            .padding(top = 10.dp)
                     ) {
                         Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
                     }
@@ -151,7 +151,6 @@ fun OwnerMainScreenContent(
                 }
 
                 Text(
-                    // Muestra el username o "Your" si no está disponible
                     text = "$username Businesses",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
@@ -173,7 +172,8 @@ fun OwnerMainScreenContent(
                             BusinessCard(
                                 name = business["name"] as String,
                                 address = business["address"] as String,
-                                foodType = business["foodType"] as String
+                                foodType = business["foodType"] as String,
+                                imageUrl = business["imageUrl"] as? String
                             )
                         }
                     }
@@ -186,9 +186,9 @@ fun OwnerMainScreenContent(
                 shape = CircleShape,
                 containerColor = Color(0xFF0072A3),
                 modifier = Modifier
-                    .size(100.dp)  // Aumentar el tamaño en un 10%
-                    .align(Alignment.BottomEnd)  // Alinearlo a la parte inferior derecha
-                    .padding(16.dp)  // Añadir padding para separarlo de los bordes
+                    .size(100.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Business", tint = Color.White)
             }
@@ -197,7 +197,7 @@ fun OwnerMainScreenContent(
 }
 
 @Composable
-fun BusinessCard(name: String, address: String, foodType: String) {
+fun BusinessCard(name: String, address: String, foodType: String, imageUrl: String?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -214,16 +214,30 @@ fun BusinessCard(name: String, address: String, foodType: String) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            // Imagen de ejemplo
-            Image(
-                painter = painterResource(id = R.drawable.food_image), // Reemplaza con un recurso de imagen adecuado
-                contentDescription = "Business Image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .padding(bottom = 8.dp),
-                contentScale = ContentScale.Crop
-            )
+            // Cargar imagen desde URL usando Coil
+            imageUrl?.let {
+                Image(
+                    painter = rememberImagePainter(it),
+                    contentDescription = "Business Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(bottom = 8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: run {
+                // Imagen de reserva si no hay imagen en la base de datos
+                Image(
+                    painter = painterResource(id = R.drawable.food_image),  // Reemplaza con un recurso de imagen adecuado
+                    contentDescription = "Placeholder Business Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(bottom = 8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
             Text(text = name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Text(
                 text = address,
@@ -235,3 +249,5 @@ fun BusinessCard(name: String, address: String, foodType: String) {
         }
     }
 }
+
+
