@@ -54,7 +54,6 @@ fun AddBusinessScreen(
 
     val currentUser = auth.currentUser
 
-    // Launcher para abrir la galería
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         selectedImageUri = uri
     }
@@ -103,7 +102,8 @@ fun AddBusinessScreen(
                 text = "Add Business",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 12.dp, top = 24.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
             // Nombre del negocio
@@ -179,7 +179,8 @@ fun AddBusinessScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Añadir un Spacer para empujar el botón hacia la parte inferior de la pantalla
+            Spacer(modifier = Modifier.weight(1f))
 
             // Botón para agregar el negocio
             Button(
