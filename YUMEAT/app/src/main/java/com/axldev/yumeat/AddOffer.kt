@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,10 @@ fun AddOfferScreen(
     var offerName by remember { mutableStateOf("") }
     var offerDetails by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+
+    val currentUser = auth.currentUser
 
     Scaffold(
         bottomBar = {
@@ -100,8 +106,25 @@ fun AddOfferScreen(
             Button(
                 onClick = {
                     if (offerName.isNotEmpty() && offerDetails.isNotEmpty()) {
-                        Toast.makeText(context, "Offer added successfully", Toast.LENGTH_SHORT).show()
-                        onOfferAdded()
+                        if (currentUser != null) {
+                            val userUID = currentUser.uid
+                            val offer = hashMapOf(
+                                "offerName" to offerName,
+                                "offerDetails" to offerDetails,
+                                "userUID" to userUID
+                            )
+                            db.collection("offers")
+                                .add(offer)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Offer added successfully", Toast.LENGTH_SHORT).show()
+                                    onOfferAdded()
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(context, "Error adding offer: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        } else {
+                            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                     }
