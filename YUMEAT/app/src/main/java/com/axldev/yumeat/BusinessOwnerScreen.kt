@@ -190,10 +190,17 @@ fun BusinessOwnerScreen(
 fun EventList() {
     val db = FirebaseFirestore.getInstance()
     val events = remember { mutableStateOf(listOf<Map<String, String>>()) }
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
 
-    LaunchedEffect(Unit) {
-        val eventDocs = db.collection("events").get().await()
-        events.value = eventDocs.documents.map { it.data as Map<String, String> }
+    LaunchedEffect(currentUser?.uid) {
+        if (currentUser != null) {
+            val eventDocs = db.collection("events")
+                .whereEqualTo("userUID", currentUser.uid) // Filtrar por userUID
+                .get()
+                .await()
+            events.value = eventDocs.documents.map { it.data as Map<String, String> }
+        }
     }
 
     Column {
@@ -207,10 +214,17 @@ fun EventList() {
 fun OfferList() {
     val db = FirebaseFirestore.getInstance()
     val offers = remember { mutableStateOf(listOf<Map<String, String>>()) }
+    val auth = FirebaseAuth.getInstance()
+    val currentUser = auth.currentUser
 
-    LaunchedEffect(Unit) {
-        val offerDocs = db.collection("offers").get().await()
-        offers.value = offerDocs.documents.map { it.data as Map<String, String> }
+    LaunchedEffect(currentUser?.uid) {
+        if (currentUser != null) {
+            val offerDocs = db.collection("offers")
+                .whereEqualTo("userUID", currentUser.uid) // Filtrar por userUID
+                .get()
+                .await()
+            offers.value = offerDocs.documents.map { it.data as Map<String, String> }
+        }
     }
 
     Column {
