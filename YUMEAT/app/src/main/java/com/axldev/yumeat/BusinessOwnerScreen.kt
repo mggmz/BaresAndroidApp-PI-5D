@@ -28,7 +28,7 @@ fun BusinessOwnerScreen(
     onAddEventClick: () -> Unit,
     onAddOfferClick: () -> Unit,
     onLogoutClick: () -> Unit, // Parámetro para redirigir a la pantalla de login después de cerrar sesión
-    onNavigateToHome: () -> Unit  // Nuevo parámetro para regresar a la pantalla de OwnerMainScreen
+    onNavigateToHome: () -> Unit  // Parámetro para regresar a la pantalla de OwnerMainScreen
 ) {
     var selectedTab by remember { mutableStateOf("Events") }
     val auth = FirebaseAuth.getInstance()
@@ -160,17 +160,17 @@ fun BusinessOwnerScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Lista de eventos u ofertas
-                if (selectedTab == "Events") {
-                    EventList()
-                } else {
-                    OfferList()
-                }
+//                // Lista de eventos u ofertas
+//                if (selectedTab == "Events") {
+//                    EventList()
+//                } else {
+//                    OfferList()
+//                }
             }
 
             // FloatingActionButton para agregar eventos u ofertas
             FloatingActionButton(
-                onClick = { if (selectedTab == "Events") onAddEventClick() else onAddOfferClick() },
+                onClick = { if (selectedTab == "Events") onAddEventClick() else onAddOfferClick() },  // Navegar a AddEvent o AddOffer
                 shape = CircleShape,
                 containerColor = Color(0xFF0072A3),
                 modifier = Modifier
@@ -183,57 +183,3 @@ fun BusinessOwnerScreen(
         }
     }
 }
-
-@Composable
-fun EventList() {
-    Column {
-        repeat(2) { index ->
-            EventCard(title = "Evento $index", place = "Lugar $index", date = "Fecha $index")
-        }
-    }
-}
-
-@Composable
-fun OfferList() {
-    Column {
-        repeat(2) { index ->
-            OfferCard(title = "Oferta $index", place = "Lugar $index", date = "Fecha $index")
-        }
-    }
-}
-
-@Composable
-fun EventCard(title: String, place: String, date: String) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(text = title, fontWeight = FontWeight.Bold)
-                Text(text = place, color = Color.Gray)
-                Text(text = date, color = Color.Gray)
-            }
-        }
-    }
-}
-
-@Composable
-fun OfferCard(title: String, place: String, date: String) {
-    EventCard(title, place, date) // Reutiliza el diseño de EventCard.
-}
-
-@Composable
-fun BusinessOwnerScreenPreview() {
-    BusinessOwnerScreen(
-        onAddEventClick = { /* Acción de agregar evento */ },
-        onAddOfferClick = { /* Acción de agregar oferta */ },
-        onLogoutClick = { /* Acción de cerrar sesión */ },
-        onNavigateToHome = { /* Acción para regresar a OwnerMainScreen */ }
-    )
-}
-

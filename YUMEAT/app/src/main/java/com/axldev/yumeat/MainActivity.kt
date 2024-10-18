@@ -107,10 +107,10 @@ class MainActivity : ComponentActivity() {
                 composable("business_owner") {
                     BusinessOwnerScreen(
                         onAddEventClick = {
-                            // Acciones para agregar un evento
+                            navController.navigate("add_event") // Navegar al formulario de eventos
                         },
                         onAddOfferClick = {
-                            // Acciones para agregar una oferta
+                            navController.navigate("add_offer") // Navegar al formulario de ofertas
                         },
                         onLogoutClick = {
                             authViewModel.logOut()
@@ -127,6 +127,35 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Pantalla para agregar un evento
+                composable("add_event") {
+                    AddEventScreen(
+                        onEventAdded = {
+                            navController.popBackStack() // Navega de regreso después de agregar un evento
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main")
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner")
+                        }
+                    )
+                }
+
+// Pantalla para agregar una oferta
+                composable("add_offer") {
+                    AddOfferScreen(
+                        onOfferAdded = {
+                            navController.popBackStack() // Navega de regreso después de agregar una oferta
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main")
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner")
+                        }
+                    )
+                }
             }
         }
 

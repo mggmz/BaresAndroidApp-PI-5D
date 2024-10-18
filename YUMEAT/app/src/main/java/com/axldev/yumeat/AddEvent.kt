@@ -2,42 +2,63 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 
 @Composable
-fun AddEventScreen() {
-    var description by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var startsAt by remember { mutableStateOf("") }
-    var endsAt by remember { mutableStateOf("") }
+fun AddEventScreen(
+    onEventAdded: () -> Unit,
+    onNavigateToHome: () -> Unit,  // Parámetro para navegar a Home
+    onNavigateToOffers: () -> Unit // Parámetro para navegar a la pantalla de ofertas
+) {
+    var eventName by remember { mutableStateOf("") }
+    var eventLocation by remember { mutableStateOf("") }
+    var eventDate by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
-    // Scaffold para manejar el BottomAppBar
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                backgroundColor = Color(0xFFE9E9E9)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                // Botón de navegación para Home con ícono
-                IconButton(onClick = { /* Lógica para ir a Home */ }) {
-                    Icon(Icons.Filled.Home, contentDescription = "Home") // Ícono para el botón Home
-                }
-                Spacer(Modifier.weight(1f)) // Espacio flexible para centrar el botón
-                // Botón de navegación para Location con ícono
-                IconButton(onClick = { /* Lógica para ir a Location */ }) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Location") // Ícono para el botón Location
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onNavigateToHome,  // Navega al Home cuando se presiona el botón
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onNavigateToOffers,  // Navega a la pantalla de ofertas
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+                    }
                 }
             }
         }
@@ -49,72 +70,54 @@ fun AddEventScreen() {
                 .padding(16.dp)
                 .background(Color.White)
         ) {
-            // Título
             Text(
                 text = "Add Event",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(bottom = 24.dp)
-                    .align(Alignment.CenterHorizontally)
+                modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Description Field
-            Text(text = "Description", fontWeight = FontWeight.Bold)
+            // Event Name Field
             OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
+                value = eventName,
+                onValueChange = { eventName = it },
+                label = { Text("Event Name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Place/Address Field
-            Text(text = "Place/Address", fontWeight = FontWeight.Bold)
+            // Event Location Field
             OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
+                value = eventLocation,
+                onValueChange = { eventLocation = it },
+                label = { Text("Event Location") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Starts At Field
-            Text(text = "Starts At", fontWeight = FontWeight.Bold)
+            // Event Date Field
             OutlinedTextField(
-                value = startsAt,
-                onValueChange = { startsAt = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text) // Cambia el tipo de teclado según sea necesario
+                value = eventDate,
+                onValueChange = { eventDate = it },
+                label = { Text("Event Date") },
+                modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Ends At Field
-            Text(text = "Ends At", fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = endsAt,
-                onValueChange = { endsAt = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text) // Cambia el tipo de teclado según sea necesario
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Image Upload Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Texto para agregar imágenes
-                Text(text = "Add Images")
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Add Event Button
             Button(
-                onClick = { /* Lógica para agregar evento */ },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0072A3)),
+                onClick = {
+                    if (eventName.isNotEmpty() && eventLocation.isNotEmpty() && eventDate.isNotEmpty()) {
+                        Toast.makeText(context, "Event added successfully", Toast.LENGTH_SHORT).show()
+                        onEventAdded()
+                    } else {
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0072A3)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
@@ -123,10 +126,4 @@ fun AddEventScreen() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AddEventScreenPreview() {
-    AddEventScreen()
 }

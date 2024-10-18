@@ -2,8 +2,12 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,32 +16,48 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalOffer
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun AddOfferScreen(
-    onOfferAdded: () -> Unit  // Para realizar alguna acción al agregar la oferta
+    onOfferAdded: () -> Unit,
+    onNavigateToHome: () -> Unit,  // Parámetro para navegar a Home
+    onNavigateToOffers: () -> Unit // Parámetro para navegar a la pantalla de ofertas
 ) {
-    var description by remember { mutableStateOf("") }
-    var discount by remember { mutableStateOf("") }
-    var validUntil by remember { mutableStateOf("") }
+    var offerName by remember { mutableStateOf("") }
+    var offerDetails by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
-    // Scaffold para manejar el BottomAppBar
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                backgroundColor = Color(0xFFE9E9E9)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                // Botón de navegación para Home con ícono
-                IconButton(onClick = { /* Lógica para ir a Home */ }) {
-                    Icon(Icons.Filled.Home, contentDescription = "Home")
-                }
-                Spacer(Modifier.weight(1f))  // Espacio flexible para centrar el botón
-                // Botón de navegación para Offers con ícono
-                IconButton(onClick = { /* Lógica para ir a Offers */ }) {
-                    Icon(Icons.Filled.LocalOffer, contentDescription = "Offers")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onNavigateToHome,  // Navega al Home cuando se presiona el botón
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onNavigateToOffers,  // Navega a la pantalla de ofertas
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+                    }
                 }
             }
         }
@@ -49,54 +69,44 @@ fun AddOfferScreen(
                 .padding(16.dp)
                 .background(Color.White)
         ) {
-            // Título
             Text(
                 text = "Add Offer",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(bottom = 24.dp)
-                    .align(Alignment.CenterHorizontally)
+                modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Description Field
-            Text(text = "Offer Description", fontWeight = FontWeight.Bold)
+            // Offer Name Field
             OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
+                value = offerName,
+                onValueChange = { offerName = it },
+                label = { Text("Offer Name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Discount Field
-            Text(text = "Discount Percentage", fontWeight = FontWeight.Bold)
+            // Offer Details Field
             OutlinedTextField(
-                value = discount,
-                onValueChange = { discount = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                value = offerDetails,
+                onValueChange = { offerDetails = it },
+                label = { Text("Offer Details") },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Valid Until Field
-            Text(text = "Valid Until", fontWeight = FontWeight.Bold)
-            OutlinedTextField(
-                value = validUntil,
-                onValueChange = { validUntil = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Add Offer Button
             Button(
                 onClick = {
-                    onOfferAdded()  // Ejecutar la lógica de agregar oferta
+                    if (offerName.isNotEmpty() && offerDetails.isNotEmpty()) {
+                        Toast.makeText(context, "Offer added successfully", Toast.LENGTH_SHORT).show()
+                        onOfferAdded()
+                    } else {
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    }
                 },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0072A3)),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0072A3)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
