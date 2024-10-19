@@ -2,6 +2,7 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 // Importaciones adicionales
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +35,8 @@ import kotlinx.coroutines.tasks.await
 fun OwnerMainScreenContent(
     onAddBusinessClick: () -> Unit,
     onAddOfferClick: () -> Unit,  // Agregado para manejar el clic en el ícono de la etiqueta
-    onLogoutClick: () -> Unit  // Parámetro para redirigir a la pantalla de login después de cerrar sesión
+    onLogoutClick: () -> Unit,  // Parámetro para redirigir a la pantalla de login después de cerrar sesión
+    onEditBusinessClick: (String) -> Unit  // Nuevo parámetro para manejar la navegación al editar negocio
 ) {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -54,13 +56,19 @@ fun OwnerMainScreenContent(
                 val userDoc = db.collection("users").document(userUID).get().await()
                 username = userDoc.getString("username")?.let { "@$it's" } ?: "@Your"
 
-                // Obtener los negocios del usuario
+                // Obtener los negocios del usuario, incluyendo los IDs correctos
                 val businessDocs = db.collection("business")
                     .whereEqualTo("userUID", userUID)
                     .get()
                     .await()
 
-                businesses = businessDocs.map { it.data }
+                // Asegurarse de que estamos obteniendo el ID del documento y los datos
+                businesses = businessDocs.documents.map { doc ->
+                    val data = doc.data as MutableMap<String, Any>
+                    data["id"] = doc.id  // Añadir el ID del documento como un campo más
+                    data
+                }.sortedByDescending { it["createdAt"] as? Long }
+
                 loading = false
             } catch (e: Exception) {
                 loading = false
@@ -173,7 +181,13 @@ fun OwnerMainScreenContent(
                                 name = business["name"] as String,
                                 address = business["address"] as String,
                                 foodType = business["foodType"] as String,
-                                imageUrl = business["imageUrl"] as? String
+                                imageUrl = business["imageUrl"] as? String,
+                                onClick = {
+                                    val businessId = business["id"] as? String
+                                    if (businessId != null) {
+                                        onEditBusinessClick(businessId)
+                                    }
+                                }  // Nueva funcionalidad al hacer clic
                             )
                         }
                     }
@@ -197,7 +211,7 @@ fun OwnerMainScreenContent(
 }
 
 @Composable
-fun BusinessCard(name: String, address: String, foodType: String, imageUrl: String?) {
+fun BusinessCard(name: String, address: String, foodType: String, imageUrl: String?, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,7 +221,8 @@ fun BusinessCard(name: String, address: String, foodType: String, imageUrl: Stri
                 shape = RoundedCornerShape(16.dp)
                 clip = true
             }
-            .background(Color.White, RoundedCornerShape(16.dp)),
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .clickable { onClick() },  // Ahora la tarjeta es clickeable
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -249,5 +264,3 @@ fun BusinessCard(name: String, address: String, foodType: String, imageUrl: Stri
         }
     }
 }
-
-

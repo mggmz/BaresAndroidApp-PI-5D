@@ -84,6 +84,29 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("login") {
                                 popUpTo("owner_main") { inclusive = true }
                             }
+                        },
+                        onEditBusinessClick = { businessId ->
+                            navController.navigate("edit_business/$businessId")
+                        }
+                    )
+                }
+
+                // Pantalla para editar negocios
+                composable("edit_business/{businessId}") { backStackEntry ->
+                    val businessId = backStackEntry.arguments?.getString("businessId") ?: return@composable
+                    EditBusinessScreen(
+                        businessId = businessId,
+                        onBusinessUpdated = {
+                            navController.popBackStack()
+                        },
+                        onBusinessDeleted = {
+                            navController.popBackStack()
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") // Redirige a la pantalla de Owner Main
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") // Redirige a la pantalla de Business Owner
                         }
                     )
                 }
