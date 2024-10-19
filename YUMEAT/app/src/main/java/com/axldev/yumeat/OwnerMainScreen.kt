@@ -56,18 +56,18 @@ fun OwnerMainScreenContent(
                 val userDoc = db.collection("users").document(userUID).get().await()
                 username = userDoc.getString("username")?.let { "@$it's" } ?: "@Your"
 
-                // Obtener los negocios del usuario, incluyendo los IDs correctos
+                // Obtener los negocios del usuario y ordenarlos por fecha de creación
                 val businessDocs = db.collection("business")
                     .whereEqualTo("userUID", userUID)
                     .get()
                     .await()
 
-                // Asegurarse de que estamos obteniendo el ID del documento y los datos
+                // Ordenar los negocios por el campo "createdAt" de manera descendente
                 businesses = businessDocs.documents.map { doc ->
                     val data = doc.data as MutableMap<String, Any>
                     data["id"] = doc.id  // Añadir el ID del documento como un campo más
                     data
-                }.sortedByDescending { it["createdAt"] as? Long }
+                }.sortedByDescending { it["createdAt"] as? Long }  // Ordenar los más recientes primero
 
                 loading = false
             } catch (e: Exception) {
