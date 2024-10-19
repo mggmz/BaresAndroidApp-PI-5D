@@ -2,6 +2,7 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,8 +30,10 @@ import kotlinx.coroutines.tasks.await
 fun BusinessOwnerScreen(
     onAddEventClick: () -> Unit,
     onAddOfferClick: () -> Unit,
-    onLogoutClick: () -> Unit, // Parámetro para redirigir a la pantalla de login después de cerrar sesión
-    onNavigateToHome: () -> Unit  // Parámetro para regresar a la pantalla de OwnerMainScreen
+    onEditEventClick: (String) -> Unit,  // Nuevo parámetro para editar eventos
+    onEditOfferClick: (String) -> Unit,  // Nuevo parámetro para editar ofertas
+    onLogoutClick: () -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf("Events") }
     val auth = FirebaseAuth.getInstance()
@@ -51,9 +54,8 @@ fun BusinessOwnerScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Botón de Home
                     IconButton(
-                        onClick = { onNavigateToHome() },  // Acción para regresar a OwnerMainScreen
+                        onClick = { onNavigateToHome() },
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
@@ -63,7 +65,7 @@ fun BusinessOwnerScreen(
                         )
                     }
                     IconButton(
-                        onClick = onAddOfferClick,  // Usar el parámetro aquí para la navegación
+                        onClick = onAddOfferClick,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
@@ -90,7 +92,6 @@ fun BusinessOwnerScreen(
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Botón de cerrar sesión en la parte superior izquierda
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -98,16 +99,15 @@ fun BusinessOwnerScreen(
                     IconButton(
                         onClick = {
                             auth.signOut()
-                            onLogoutClick()  // Redirigir al LoginScreen después de cerrar sesión
+                            onLogoutClick()
                         },
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
                         Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
                     }
 
-                    // Imagen del logo en lugar de texto "Yum Eat"
                     Image(
-                        painter = painterResource(id = R.drawable.applogo),  // Reemplaza con tu logo
+                        painter = painterResource(id = R.drawable.applogo),
                         contentDescription = "Yum Eat Logo",
                         modifier = Modifier
                             .size(200.dp)
@@ -116,12 +116,11 @@ fun BusinessOwnerScreen(
                     )
                 }
 
-                // Menú de navegación (Events/Offers)
                 Row(
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp) // Añadir un padding lateral para separación
+                        .padding(horizontal = 16.dp)
                 ) {
                     Tab(
                         selected = selectedTab == "Events",
@@ -130,9 +129,9 @@ fun BusinessOwnerScreen(
                             .background(
                                 if (selectedTab == "Events") Color(0xFFFFA500)
                                 else Color.Transparent,
-                                shape = RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp) // Solo redondear esquinas izquierdas
+                                shape = RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp)
                             )
-                            .padding(vertical = 12.dp, horizontal = 24.dp) // Padding para darle más cuerpo a la píldora
+                            .padding(vertical = 12.dp, horizontal = 24.dp)
                             .weight(1f),
                     ) {
                         Text(
@@ -140,7 +139,7 @@ fun BusinessOwnerScreen(
                             color = if (selectedTab == "Events") Color.White else Color.Black
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp)) // Añadir un espaciador entre las pestañas
+                    Spacer(modifier = Modifier.width(8.dp))
                     Tab(
                         selected = selectedTab == "Offers",
                         onClick = { selectedTab = "Offers" },
@@ -148,9 +147,9 @@ fun BusinessOwnerScreen(
                             .background(
                                 if (selectedTab == "Offers") Color(0xFFFFA500)
                                 else Color.Transparent,
-                                shape = RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp) // Solo redondear esquinas derechas
+                                shape = RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp)
                             )
-                            .padding(vertical = 12.dp, horizontal = 24.dp) // Padding para darle más cuerpo a la píldora
+                            .padding(vertical = 12.dp, horizontal = 24.dp)
                             .weight(1f),
                     ) {
                         Text(
@@ -164,21 +163,20 @@ fun BusinessOwnerScreen(
 
                 // Lista de eventos u ofertas
                 if (selectedTab == "Events") {
-                    EventList()
+                    EventList(onEditEventClick)  // Pasa el parámetro para editar eventos
                 } else {
-                    OfferList()
+                    OfferList(onEditOfferClick)  // Pasa el parámetro para editar ofertas
                 }
             }
 
-            // FloatingActionButton para agregar eventos u ofertas
             FloatingActionButton(
-                onClick = { if (selectedTab == "Events") onAddEventClick() else onAddOfferClick() },  // Navegar a AddEvent o AddOffer
+                onClick = { if (selectedTab == "Events") onAddEventClick() else onAddOfferClick() },
                 shape = CircleShape,
                 containerColor = Color(0xFF0072A3),
                 modifier = Modifier
-                    .size(100.dp)  // Aumentar el tamaño en un 10%
-                    .align(Alignment.BottomEnd)  // Alinearlo a la parte inferior derecha
-                    .padding(16.dp)  // Añadir padding para separarlo de los bordes
+                    .size(100.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Event/Offer", tint = Color.White)
             }
@@ -187,59 +185,100 @@ fun BusinessOwnerScreen(
 }
 
 @Composable
-fun EventList() {
+fun EventList(onEditEventClick: (String) -> Unit) {
     val db = FirebaseFirestore.getInstance()
-    val events = remember { mutableStateOf(listOf<Map<String, String>>()) }
+    val events = remember { mutableStateOf(listOf<Map<String, Any>>()) }
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
     LaunchedEffect(currentUser?.uid) {
         if (currentUser != null) {
-            val eventDocs = db.collection("events")
-                .whereEqualTo("userUID", currentUser.uid) // Filtrar por userUID
-                .get()
-                .await()
-            events.value = eventDocs.documents.map { it.data as Map<String, String> }
+            try {
+                val eventDocs = db.collection("events")
+                    .whereEqualTo("userUID", currentUser.uid)
+                    .get()
+                    .await()
+                // Mapear los datos incluyendo el ID del documento
+                events.value = eventDocs.documents.map { doc ->
+                    doc.data?.toMutableMap()?.also { it["eventId"] = doc.id } ?: emptyMap()
+                }
+            } catch (e: Exception) {
+                // Manejar el error si ocurre
+            }
         }
     }
 
+    // Mostrar los eventos en la interfaz
     Column {
-        events.value.forEach { event ->
-            EventCard(title = event["eventName"] ?: "No Title", place = event["eventLocation"] ?: "No Location", date = event["eventDate"] ?: "No Date")
+        if (events.value.isEmpty()) {
+            Text("No events found", modifier = Modifier.padding(16.dp))
+        } else {
+            events.value.forEach { event ->
+                val eventId = event["eventId"] as? String ?: ""
+                if (eventId.isNotEmpty()) {
+                    EventCard(
+                        title = event["eventName"] as? String ?: "No Title",
+                        place = event["eventLocation"] as? String ?: "No Location",
+                        date = event["eventDate"] as? String ?: "No Date",
+                        onClick = { onEditEventClick(eventId) }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun OfferList() {
+fun OfferList(onEditOfferClick: (String) -> Unit) {
     val db = FirebaseFirestore.getInstance()
-    val offers = remember { mutableStateOf(listOf<Map<String, String>>()) }
+    val offers = remember { mutableStateOf(listOf<Map<String, Any>>()) }
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
     LaunchedEffect(currentUser?.uid) {
         if (currentUser != null) {
-            val offerDocs = db.collection("offers")
-                .whereEqualTo("userUID", currentUser.uid) // Filtrar por userUID
-                .get()
-                .await()
-            offers.value = offerDocs.documents.map { it.data as Map<String, String> }
+            try {
+                val offerDocs = db.collection("offers")
+                    .whereEqualTo("userUID", currentUser.uid)
+                    .get()
+                    .await()
+                // Mapear los datos incluyendo el ID del documento
+                offers.value = offerDocs.documents.map { doc ->
+                    doc.data?.toMutableMap()?.also { it["offerId"] = doc.id } ?: emptyMap()
+                }
+            } catch (e: Exception) {
+                // Manejar el error si ocurre
+            }
         }
     }
 
+    // Mostrar las ofertas en la interfaz
     Column {
-        offers.value.forEach { offer ->
-            OfferCard(title = offer["offerName"] ?: "No Title", place = offer["offerDetails"] ?: "No Details", date = "")
+        if (offers.value.isEmpty()) {
+            Text("No offers found", modifier = Modifier.padding(16.dp))
+        } else {
+            offers.value.forEach { offer ->
+                val offerId = offer["offerId"] as? String ?: ""
+                if (offerId.isNotEmpty()) {
+                    OfferCard(
+                        title = offer["offerName"] as? String ?: "No Title",
+                        place = offer["offerDetails"] as? String ?: "No Details",
+                        date = "",
+                        onClick = { onEditOfferClick(offerId) }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun EventCard(title: String, place: String, date: String) {
+fun EventCard(title: String, place: String, date: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable { onClick() },  // Añadido onClick para navegar a la edición
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -255,6 +294,6 @@ fun EventCard(title: String, place: String, date: String) {
 }
 
 @Composable
-fun OfferCard(title: String, place: String, date: String) {
-    EventCard(title, place, date) // Reutiliza el diseño de EventCard.
+fun OfferCard(title: String, place: String, date: String, onClick: () -> Unit) {
+    EventCard(title, place, date, onClick)
 }

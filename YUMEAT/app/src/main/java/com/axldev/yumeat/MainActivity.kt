@@ -135,6 +135,12 @@ class MainActivity : ComponentActivity() {
                         onAddOfferClick = {
                             navController.navigate("add_offer") // Navegar al formulario de ofertas
                         },
+                        onEditEventClick = { eventId ->
+                            navController.navigate("edit_event/$eventId")  // Navegar a la pantalla de editar evento
+                        },
+                        onEditOfferClick = { offerId ->
+                            navController.navigate("edit_offer/$offerId")  // Navegar a la pantalla de editar oferta
+                        },
                         onLogoutClick = {
                             authViewModel.logOut()
                             navController.navigate("login") {
@@ -142,12 +148,43 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onNavigateToHome = {
-                            // Navegar de vuelta al OwnerMainScreen
                             navController.navigate("owner_main") {
                                 popUpTo("business_owner") { inclusive = true }
                             }
                         }
                     )
+                }
+
+                // Pantalla para editar un evento
+                composable("edit_event/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+                    if (eventId.isNotEmpty()) {
+                        EditEventScreen(
+                            eventId = eventId,
+                            onEventUpdated = { navController.popBackStack() },
+                            onEventDeleted = { navController.popBackStack() },
+                            onNavigateToHome = { navController.navigate("owner_main") },
+                            onNavigateToOffers = { navController.navigate("business_owner") }
+                        )
+                    } else {
+                        // Maneja el caso en el que eventId esté vacío
+                    }
+                }
+
+                // Pantalla para editar una oferta
+                composable("edit_offer/{offerId}") { backStackEntry ->
+                    val offerId = backStackEntry.arguments?.getString("offerId") ?: ""
+                    if (offerId.isNotEmpty()) {
+                        EditOfferScreen(
+                            offerId = offerId,
+                            onOfferUpdated = { navController.popBackStack() },
+                            onOfferDeleted = { navController.popBackStack() },
+                            onNavigateToHome = { navController.navigate("owner_main") },
+                            onNavigateToOffers = { navController.navigate("business_owner") }
+                        )
+                    } else {
+                        // Maneja el caso en el que offerId esté vacío
+                    }
                 }
 
                 // Pantalla para agregar un evento
