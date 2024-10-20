@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
@@ -163,9 +164,27 @@ fun BusinessOwnerScreen(
 
                 // Lista de eventos u ofertas
                 if (selectedTab == "Events") {
-                    EventList(onEditEventClick)  // Pasa el parámetro para editar eventos
+                    EventList(
+                        onEditEventClick = { eventId ->
+                            onEditEventClick(eventId)  // Pasa la lógica para editar eventos
+                        },
+                        onDeleteEventClick = { eventId ->
+                            val db = FirebaseFirestore.getInstance()
+                            // Lógica para eliminar el evento
+                            db.collection("events").document(eventId).delete()
+                        }
+                    )
                 } else {
-                    OfferList(onEditOfferClick)  // Pasa el parámetro para editar ofertas
+                    OfferList(
+                        onEditOfferClick = { offerId ->
+                            onEditOfferClick(offerId)  // Pasa la lógica para editar ofertas
+                        },
+                        onDeleteOfferClick = { offerId ->
+                            val db = FirebaseFirestore.getInstance()
+                            // Lógica para eliminar la oferta
+                            db.collection("offers").document(offerId).delete()
+                        }
+                    )
                 }
             }
 
@@ -185,21 +204,24 @@ fun BusinessOwnerScreen(
 }
 
 @Composable
-fun EventList(onEditEventClick: (String) -> Unit) {
+fun EventList(
+    onEditEventClick: (String) -> Unit,
+    onDeleteEventClick: (String) -> Unit
+) {
     val db = FirebaseFirestore.getInstance()
-    val events = remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var events by remember { mutableStateOf(listOf<Map<String, Any>>()) }
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    LaunchedEffect(currentUser?.uid) {
+    // Recargar la lista de eventos cada vez que haya un cambio
+    LaunchedEffect(Unit) {
         if (currentUser != null) {
             try {
                 val eventDocs = db.collection("events")
                     .whereEqualTo("userUID", currentUser.uid)
                     .get()
                     .await()
-                // Mapear los datos incluyendo el ID del documento
-                events.value = eventDocs.documents.map { doc ->
+                events = eventDocs.documents.map { doc ->
                     doc.data?.toMutableMap()?.also { it["eventId"] = doc.id } ?: emptyMap()
                 }
             } catch (e: Exception) {
@@ -208,19 +230,25 @@ fun EventList(onEditEventClick: (String) -> Unit) {
         }
     }
 
-    // Mostrar los eventos en la interfaz
     Column {
-        if (events.value.isEmpty()) {
+        if (events.isEmpty()) {
             Text("No events found", modifier = Modifier.padding(16.dp))
         } else {
-            events.value.forEach { event ->
+            events.forEach { event ->
                 val eventId = event["eventId"] as? String ?: ""
                 if (eventId.isNotEmpty()) {
                     EventCard(
                         title = event["eventName"] as? String ?: "No Title",
                         place = event["eventLocation"] as? String ?: "No Location",
                         date = event["eventDate"] as? String ?: "No Date",
-                        onClick = { onEditEventClick(eventId) }
+                        onClick = { onEditEventClick(eventId) },
+                        onDeleteClick = {
+                            // Eliminar evento y actualizar la lista
+                            db.collection("events").document(eventId).delete().addOnSuccessListener {
+                                // Recargar la lista de eventos después de la eliminación
+                                events = events.filterNot { it["eventId"] == eventId }
+                            }
+                        }
                     )
                 }
             }
@@ -229,21 +257,24 @@ fun EventList(onEditEventClick: (String) -> Unit) {
 }
 
 @Composable
-fun OfferList(onEditOfferClick: (String) -> Unit) {
+fun OfferList(
+    onEditOfferClick: (String) -> Unit,
+    onDeleteOfferClick: (String) -> Unit
+) {
     val db = FirebaseFirestore.getInstance()
-    val offers = remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var offers by remember { mutableStateOf(listOf<Map<String, Any>>()) }
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    LaunchedEffect(currentUser?.uid) {
+    // Recargar la lista de ofertas cada vez que haya un cambio
+    LaunchedEffect(Unit) {
         if (currentUser != null) {
             try {
                 val offerDocs = db.collection("offers")
                     .whereEqualTo("userUID", currentUser.uid)
                     .get()
                     .await()
-                // Mapear los datos incluyendo el ID del documento
-                offers.value = offerDocs.documents.map { doc ->
+                offers = offerDocs.documents.map { doc ->
                     doc.data?.toMutableMap()?.also { it["offerId"] = doc.id } ?: emptyMap()
                 }
             } catch (e: Exception) {
@@ -252,19 +283,25 @@ fun OfferList(onEditOfferClick: (String) -> Unit) {
         }
     }
 
-    // Mostrar las ofertas en la interfaz
     Column {
-        if (offers.value.isEmpty()) {
+        if (offers.isEmpty()) {
             Text("No offers found", modifier = Modifier.padding(16.dp))
         } else {
-            offers.value.forEach { offer ->
+            offers.forEach { offer ->
                 val offerId = offer["offerId"] as? String ?: ""
                 if (offerId.isNotEmpty()) {
                     OfferCard(
                         title = offer["offerName"] as? String ?: "No Title",
                         place = offer["offerDetails"] as? String ?: "No Details",
                         date = "",
-                        onClick = { onEditOfferClick(offerId) }
+                        onClick = { onEditOfferClick(offerId) },
+                        onDeleteClick = {
+                            // Eliminar oferta y actualizar la lista
+                            db.collection("offers").document(offerId).delete().addOnSuccessListener {
+                                // Recargar la lista de ofertas después de la eliminación
+                                offers = offers.filterNot { it["offerId"] == offerId }
+                            }
+                        }
                     )
                 }
             }
@@ -273,27 +310,113 @@ fun OfferList(onEditOfferClick: (String) -> Unit) {
 }
 
 @Composable
-fun EventCard(title: String, place: String, date: String, onClick: () -> Unit) {
+fun ConfirmDeleteDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text(text = "Confirm Deletion") },
+        text = { Text("Are you sure you want to delete this item? This action cannot be undone.") },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm() }
+            ) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = { onDismiss() }
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun EventCard(title: String, place: String, date: String, onClick: () -> Unit, onDeleteClick: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { onClick() },  // Añadido onClick para navegar a la edición
+            .clickable { onClick() },  // Hacer que toda la tarjeta sea clickeable para editar
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, fontWeight = FontWeight.Bold)
                 Text(text = place, color = Color.Gray)
                 Text(text = date, color = Color.Gray)
             }
+
+            IconButton(
+                onClick = { showDialog = true },  // Mostrar el cuadro de diálogo de confirmación
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete Event", tint = Color.Red)
+            }
         }
+    }
+
+    if (showDialog) {
+        ConfirmDeleteDialog(
+            onConfirm = {
+                showDialog = false
+                onDeleteClick()
+            },
+            onDismiss = { showDialog = false }
+        )
     }
 }
 
 @Composable
-fun OfferCard(title: String, place: String, date: String, onClick: () -> Unit) {
-    EventCard(title, place, date, onClick)
+fun OfferCard(title: String, place: String, date: String, onClick: () -> Unit, onDeleteClick: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = title, fontWeight = FontWeight.Bold)
+                Text(text = place, color = Color.Gray)
+                Text(text = date, color = Color.Gray)
+            }
+
+            IconButton(
+                onClick = { showDialog = true },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete Offer", tint = Color.Red)
+            }
+        }
+    }
+
+    if (showDialog) {
+        ConfirmDeleteDialog(
+            onConfirm = {
+                showDialog = false
+                onDeleteClick()
+            },
+            onDismiss = { showDialog = false }
+        )
+    }
 }
+
