@@ -85,5 +85,5 @@ Meet the team behind YumEat:
 - **José Luis de Los Santos Sandoval** - [@joseluis-dls](https://github.com/joseluis-dls)
 
 ## 📬 Contact
-
+   
 For any inquiries or contributions, feel free to reach out to any of the team members through their GitHub profiles.
