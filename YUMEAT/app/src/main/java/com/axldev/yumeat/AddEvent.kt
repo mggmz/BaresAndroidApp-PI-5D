@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.viewinterop.AndroidView
 import java.util.*
@@ -89,6 +91,7 @@ fun AddEventScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
                 .background(Color.White)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Add Event",

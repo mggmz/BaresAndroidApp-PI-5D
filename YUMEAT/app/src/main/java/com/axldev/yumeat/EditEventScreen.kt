@@ -3,8 +3,10 @@ package com.axldev.yumeat
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
@@ -99,6 +101,7 @@ fun EditEventScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
                 .background(Color.White)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Edit Event",
