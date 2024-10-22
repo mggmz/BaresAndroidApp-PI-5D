@@ -36,7 +36,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFFFF))
+            .background(Color(0xFFFFF5D4))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -119,9 +119,10 @@ fun LoginScreen(
                     errorMessage = "Please enter valid credentials"
                 }
             },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC700)),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Login")
+            Text(text = "Login", color = Color.Black)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
