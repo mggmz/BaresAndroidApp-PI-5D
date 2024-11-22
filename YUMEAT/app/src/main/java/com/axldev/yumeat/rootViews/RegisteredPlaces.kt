@@ -1,6 +1,5 @@
 package com.axldev.yumeat
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
@@ -154,4 +154,22 @@ fun formatDate(timestamp: Long): String {
     val date = java.util.Date(timestamp)
     val format = java.text.SimpleDateFormat("dd-MM-yyyy", java.util.Locale.getDefault())
     return format.format(date)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegisteredPlacesScreenPreview() {
+    RegisteredPlacesScreen()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PlaceCardPreview() {
+    PlaceCard(
+        name = "Sample Place",
+        address = "123 Example St, City",
+        imageUrl = null,
+        date = "Added at: 22-11-2024",
+        onDeleteClick = {}
+    )
 }

@@ -1,7 +1,5 @@
 package com.axldev.yumeat.rootViews
 
-
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axldev.yumeat.R
@@ -158,3 +157,22 @@ fun UserCard(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun RegisteredUsersScreenPreview() {
+    RegisteredUsersScreen(
+        onEditUserClick = {},
+        onDeleteUserClick = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserCardPreview() {
+    UserCard(
+        username = "John Doe",
+        email = "johndoe@example.com",
+        onEditClick = {},
+        onDeleteClick = {}
+    )
+}
