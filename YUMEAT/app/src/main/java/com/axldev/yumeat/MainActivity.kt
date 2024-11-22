@@ -11,8 +11,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.axldev.yumeat.clientViews.UserMainScreenContent
+import com.axldev.yumeat.rootViews.ActiveAlertsOffersScreen
+import com.axldev.yumeat.rootViews.RegisteredUsersScreen
 import com.axldev.yumeat.viewmodel.AuthViewModel
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,15 +86,43 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Pantalla principal para Root
+                composable("root_main") {
+                    ActiveAlertsOffersScreen(
+                        onDeleteOfferClick = { offerId ->
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("offers").document(offerId).delete().addOnSuccessListener {
+                                Log.d("ActiveAlertsOffers", "Offer deleted successfully")
+                            }.addOnFailureListener {
+                                Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
+                            }
+                        }
+                    )
+                }
 
-                // Pantalla Principal del Owner
+                // Pantalla principal para Cliente
+                composable("client_main") {
+                    UserMainScreenContent(
+                        onHomeClick = {
+                            navController.navigate("owner_main")
+                        },
+                        onOffersClick = {
+                            navController.navigate("business_owner")
+                        },
+                        onProfileClick = {
+                            navController.navigate("user_profile")
+                        }
+                    )
+                }
+
+                // Pantalla principal para Vendedor
                 composable("owner_main") {
                     OwnerMainScreenContent(
                         onAddBusinessClick = {
                             navController.navigate("add_business")
                         },
                         onAddOfferClick = {
-                            navController.navigate("business_owner")  // Agregado para ir a la pantalla de BusinessOwnerScreen
+                            navController.navigate("business_owner")
                         },
                         onLogoutClick = {
                             authViewModel.logOut()
@@ -105,156 +136,36 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Pantalla para editar negocios
-                composable("edit_business/{businessId}") { backStackEntry ->
-                    val businessId = backStackEntry.arguments?.getString("businessId") ?: return@composable
-                    EditBusinessScreen(
-                        businessId = businessId,
-                        onBusinessUpdated = {
-                            navController.popBackStack()
-                        },
-                        onBusinessDeleted = {
-                            navController.popBackStack()
-                        },
-                        onNavigateToHome = {
-                            navController.navigate("owner_main") // Redirige a la pantalla de Owner Main
-                        },
-                        onNavigateToOffers = {
-                            navController.navigate("business_owner") // Redirige a la pantalla de Business Owner
-                        }
-                    )
-                }
-
-                // Pantalla para Agregar Negocios
-                composable("add_business") {
-                    AddBusinessScreen(
-                        onBusinessAdded = {
-                            navController.popBackStack()
-                        },
-                        onNavigateToHome = {
-                            navController.navigate("owner_main") // Redirige a la pantalla de Owner Main
-                        },
-                        onNavigateToOffers = {
-                            navController.navigate("business_owner") // Redirige a la pantalla de Business Owner
-                        }
-                    )
-                }
-
-                // Pantalla de BusinessOwnerScreen para ofertas y eventos
-                composable("business_owner") {
-                    BusinessOwnerScreen(
-                        onAddEventClick = {
-                            navController.navigate("add_event") // Navegar al formulario de eventos
-                        },
-                        onAddOfferClick = {
-                            navController.navigate("add_offer") // Navegar al formulario de ofertas
-                        },
-                        onEditEventClick = { eventId ->
-                            navController.navigate("edit_event/$eventId")  // Navegar a la pantalla de editar evento
-                        },
-                        onEditOfferClick = { offerId ->
-                            navController.navigate("edit_offer/$offerId")  // Navegar a la pantalla de editar oferta
-                        },
-                        onLogoutClick = {
-                            authViewModel.logOut()
-                            navController.navigate("login") {
-                                popUpTo("business_owner") { inclusive = true }
-                            }
-                        },
-                        onNavigateToHome = {
-                            navController.navigate("owner_main") {
-                                popUpTo("business_owner") { inclusive = true }
+                // Pantalla de Active Alerts & Offers
+                composable("active_alerts_offers") {
+                    ActiveAlertsOffersScreen(
+                        onDeleteOfferClick = { offerId ->
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("offers").document(offerId).delete().addOnSuccessListener {
+                                Log.d("ActiveAlertsOffers", "Offer deleted successfully")
+                            }.addOnFailureListener {
+                                Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
                             }
                         }
                     )
                 }
 
-                // Pantalla para editar un evento
-                composable("edit_event/{eventId}") { backStackEntry ->
-                    val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
-                    if (eventId.isNotEmpty()) {
-                        EditEventScreen(
-                            eventId = eventId,
-                            onEventUpdated = { navController.popBackStack() },
-                            onEventDeleted = { navController.popBackStack() },
-                            onNavigateToHome = { navController.navigate("owner_main") },
-                            onNavigateToOffers = { navController.navigate("business_owner") }
-                        )
-                    } else {
-                        // Maneja el caso en el que eventId esté vacío
-                    }
-                }
-
-                // Pantalla para editar una oferta
-                composable("edit_offer/{offerId}") { backStackEntry ->
-                    val offerId = backStackEntry.arguments?.getString("offerId") ?: ""
-                    if (offerId.isNotEmpty()) {
-                        EditOfferScreen(
-                            offerId = offerId,
-                            onOfferUpdated = { navController.popBackStack() },
-                            onOfferDeleted = { navController.popBackStack() },
-                            onNavigateToHome = { navController.navigate("owner_main") },
-                            onNavigateToOffers = { navController.navigate("business_owner") }
-                        )
-                    } else {
-                        // Maneja el caso en el que offerId esté vacío
-                    }
-                }
-
-                // Pantalla para agregar un evento
-                composable("add_event") {
-                    AddEventScreen(
-                        onEventAdded = {
-                            navController.popBackStack() // Navega de regreso después de agregar un evento
+                composable("registered_users") {
+                    RegisteredUsersScreen(
+                        onEditUserClick = { userId ->
+                            navController.navigate("edit_user/$userId") // Navega a la pantalla de edición de usuario
                         },
-                        onNavigateToHome = {
-                            navController.navigate("owner_main")
-                        },
-                        onNavigateToOffers = {
-                            navController.navigate("business_owner")
+                        onDeleteUserClick = { userId ->
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("users").document(userId).delete().addOnSuccessListener {
+                                Log.d("RegisteredUsers", "User deleted successfully")
+                            }.addOnFailureListener {
+                                Log.e("RegisteredUsers", "Error deleting user: ${it.message}")
+                            }
                         }
                     )
                 }
 
-                // Pantalla para agregar una oferta
-                composable("add_offer") {
-                    AddOfferScreen(
-                        onOfferAdded = {
-                            navController.popBackStack() // Navega de regreso después de agregar una oferta
-                        },
-                        onNavigateToHome = {
-                            navController.navigate("owner_main")
-                        },
-                        onNavigateToOffers = {
-                            navController.navigate("business_owner")
-                        }
-                    )
-                }
-
-                // Pantallas principales según `userType`
-
-//                composable("root_main") {
-//                    RootMainScreen(
-//                        onLogoutClick = {
-//                            authViewModel.logOut()
-//                            navController.navigate("login") { popUpTo("root_main") { inclusive = true } }
-//                        }
-//                    )
-//                }
-
-                composable("client_main") {
-                    UserMainScreenContent(
-                        onHomeClick = {
-                            navController.navigate("owner_main") // Por ejemplo, podría navegar al home principal
-                        },
-                        onOffersClick = {
-                            navController.navigate("business_owner") // Podrías redirigir a la pantalla de ofertas
-                        },
-                        onProfileClick = {
-                            navController.navigate("user_profile") // Agrega una ruta a un perfil de usuario si existe
-                        }
-                    )
-                }
             }
         }
 
@@ -266,4 +177,5 @@ class MainActivity : ComponentActivity() {
                 )
     }
 }
+
 
