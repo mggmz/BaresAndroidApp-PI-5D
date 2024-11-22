@@ -41,8 +41,8 @@ class MainActivity : ComponentActivity() {
                 // Pantalla de Registro
                 composable("register") {
                     RegisterScreen(
-                        onRegisterClick = { email, password, username ->
-                            authViewModel.registerUser(email, password, username)
+                        onRegisterClick = { email, password, username, userType ->
+                            authViewModel.registerUser(email, password, username, userType)
                             navController.navigate("login") {
                                 popUpTo("register") { inclusive = true }
                             }

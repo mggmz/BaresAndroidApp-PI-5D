@@ -17,7 +17,7 @@ class AuthViewModel : ViewModel() {
     val currentUser = _currentUser
     private val db = FirebaseFirestore.getInstance()  // Instancia de Firestore
 
-    fun registerUser(username: String, email: String, password: String) {
+    fun registerUser(username: String, email: String, password: String, userType: String) {
         viewModelScope.launch {
             try {
                 // Registrar al usuario en Firebase Auth
@@ -29,7 +29,8 @@ class AuthViewModel : ViewModel() {
                 // Guardar el username en Firestore bajo una colección de usuarios
                 val userData = hashMapOf(
                     "username" to username,
-                    "email" to email
+                    "email" to email,
+                    "userType" to userType
                 )
                 db.collection("users").document(userUID).set(userData).await()
 

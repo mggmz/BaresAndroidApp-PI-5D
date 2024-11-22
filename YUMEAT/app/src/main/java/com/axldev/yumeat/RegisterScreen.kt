@@ -23,7 +23,7 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: (String, String, String) -> Unit,  // Ahora incluye username
+    onRegisterClick: (String, String, String, String) -> Unit,  // Incluye userType
     onLoginClick: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
@@ -31,7 +31,11 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var showTermsDialog by remember { mutableStateOf(false) }  // Controlar la visibilidad del diálogo de términos
+    var showTermsDialog by remember { mutableStateOf(false) }
+
+    // Para seleccionar el tipo de usuario
+    var userType by remember { mutableStateOf("cliente") } // Valor predeterminado
+    val userTypes = listOf("cliente", "cliente vendedor")
 
     Column(
         modifier = Modifier
@@ -99,6 +103,25 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Selector de tipo de usuario
+        Text(text = "Select User Type", fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.Center) {
+            userTypes.forEach { type ->
+                Button(
+                    onClick = { userType = type },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (userType == type) Color(0xFFFFC700) else Color.LightGray
+                    ),
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    Text(text = type, color = Color.Black)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         errorMessage?.let {
             Text(text = it, color = Color.Red)
         }
@@ -106,7 +129,7 @@ fun RegisterScreen(
         Button(
             onClick = {
                 if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
-                    onRegisterClick(username, email, password)
+                    onRegisterClick(username, email, password, userType)
                     onLoginClick()  // Redirigir al login después del registro exitoso
                 } else {
                     errorMessage = "Please fill in all fields"
@@ -129,7 +152,7 @@ fun RegisterScreen(
         }
     }
 
-    //Dialog para los términos de uso
+    // Dialog para los términos de uso
     if (showTermsDialog) {
         Dialog(onDismissRequest = { showTermsDialog = false }) {
             Surface(
@@ -142,7 +165,6 @@ fun RegisterScreen(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    //X para cerrar, tambien se puede cerrar haciendo click fuera del dialog
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
@@ -160,7 +182,6 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    //Terminos de uso.
                     Text(
                         text = "Establishments may only post promotions and announcements related to their services, without misleading, offensive content or content that violates local laws.\n" +
                                 "\nUsers may not use the app for fraudulent activities, share unauthorized content, or abuse the platform through practices such as spamming.\n" +
@@ -180,3 +201,4 @@ fun RegisterScreen(
         }
     }
 }
+
