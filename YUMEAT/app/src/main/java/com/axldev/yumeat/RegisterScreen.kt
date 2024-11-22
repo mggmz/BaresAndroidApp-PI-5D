@@ -35,7 +35,7 @@ fun RegisterScreen(
 
     // Para seleccionar el tipo de usuario
     var userType by remember { mutableStateOf("cliente") } // Valor predeterminado
-    val userTypes = listOf("cliente", "cliente vendedor")
+    val userTypes = listOf("cliente", "vendedor")
 
     Column(
         modifier = Modifier

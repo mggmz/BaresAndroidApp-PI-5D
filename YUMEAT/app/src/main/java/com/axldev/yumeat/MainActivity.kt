@@ -1,6 +1,7 @@
 package com.axldev.yumeat
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.axldev.yumeat.clientViews.UserMainScreenContent
 import com.axldev.yumeat.viewmodel.AuthViewModel
 import com.google.firebase.FirebaseApp
 
@@ -57,10 +59,21 @@ class MainActivity : ComponentActivity() {
                 composable("login") {
                     LoginScreen(
                         onLoginClick = { email, password ->
-                            authViewModel.loginUser(email, password)
-                            if (authViewModel.currentUser.value != null) {
-                                navController.navigate("owner_main") {
-                                    popUpTo("login") { inclusive = true }
+                            authViewModel.loginUser(email, password) { userType ->
+                                when (userType) {
+                                    "root" -> {
+                                        navController.navigate("root_main") { popUpTo("login") { inclusive = true } }
+                                    }
+                                    "vendedor" -> {
+                                        navController.navigate("owner_main") { popUpTo("login") { inclusive = true } }
+                                    }
+                                    "cliente" -> {
+                                        navController.navigate("client_main") { popUpTo("login") { inclusive = true } }
+                                    }
+                                    else -> {
+                                        // Manejo de error si el userType es null o no válido
+                                        Log.d("MainActivity", "User type not found or invalid")
+                                    }
                                 }
                             }
                         },
@@ -69,6 +82,7 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+
 
                 // Pantalla Principal del Owner
                 composable("owner_main") {
@@ -202,7 +216,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-// Pantalla para agregar una oferta
+                // Pantalla para agregar una oferta
                 composable("add_offer") {
                     AddOfferScreen(
                         onOfferAdded = {
@@ -213,6 +227,31 @@ class MainActivity : ComponentActivity() {
                         },
                         onNavigateToOffers = {
                             navController.navigate("business_owner")
+                        }
+                    )
+                }
+
+                // Pantallas principales según `userType`
+
+//                composable("root_main") {
+//                    RootMainScreen(
+//                        onLogoutClick = {
+//                            authViewModel.logOut()
+//                            navController.navigate("login") { popUpTo("root_main") { inclusive = true } }
+//                        }
+//                    )
+//                }
+
+                composable("client_main") {
+                    UserMainScreenContent(
+                        onHomeClick = {
+                            navController.navigate("owner_main") // Por ejemplo, podría navegar al home principal
+                        },
+                        onOffersClick = {
+                            navController.navigate("business_owner") // Podrías redirigir a la pantalla de ofertas
+                        },
+                        onProfileClick = {
+                            navController.navigate("user_profile") // Agrega una ruta a un perfil de usuario si existe
                         }
                     )
                 }
@@ -227,3 +266,4 @@ class MainActivity : ComponentActivity() {
                 )
     }
 }
+

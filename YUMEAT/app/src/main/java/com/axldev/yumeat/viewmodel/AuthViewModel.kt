@@ -16,6 +16,7 @@ class AuthViewModel : ViewModel() {
     private val _currentUser: MutableStateFlow<FirebaseUser?> = MutableStateFlow(auth.currentUser)
     val currentUser = _currentUser
     private val db = FirebaseFirestore.getInstance()  // Instancia de Firestore
+    val currentUserType = MutableStateFlow<String?>(null) // Almacenar userType del user actual
 
     fun registerUser(username: String, email: String, password: String, userType: String) {
         viewModelScope.launch {
@@ -41,12 +42,22 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun loginUser(email: String, password: String) {
+    fun loginUser(email: String, password: String, onUserTypeRetrieved: (String?) -> Unit) {
         viewModelScope.launch {
             try {
-                auth.signInWithEmailAndPassword(email, password).await()
+                // Iniciar sesión
+                val result = auth.signInWithEmailAndPassword(email, password).await()
+                val userUID = result.user?.uid ?: throw Exception("User UID not found")
+
+                // Obtener el userType desde Firestore
+                val userDoc = db.collection("users").document(userUID).get().await()
+                val userType = userDoc.getString("userType")
+
+                currentUserType.value = userType // Actualizar el flujo
+                onUserTypeRetrieved(userType) // Callback con el userType
             } catch (e: Exception) {
                 Log.d(javaClass.simpleName, "${e.message}")
+                onUserTypeRetrieved(null) // Enviar null si ocurre un error
             }
         }
     }
