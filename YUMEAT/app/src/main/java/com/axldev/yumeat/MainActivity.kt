@@ -113,10 +113,12 @@ class MainActivity : ComponentActivity() {
                 composable("client_main") {
                     UserMainScreenContent(
                         onHomeClick = {
-                            navController.navigate("owner_main")
+                            navController.navigate("client_main") {
+                                popUpTo("client_main") { inclusive = true }
+                            }
                         },
                         onOffersClick = {
-                            navController.navigate("business_owner")
+                            navController.navigate("client_offers")
                         },
                         onProfileClick = {
                             navController.navigate("user_profile")
@@ -145,11 +147,35 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Pantalla root offers
+// Dentro del NavHost en MainActivity.kt
+
                 composable("offers") {
                     ActiveAlertsOffersScreen(
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onHomeClick = {
+                            navController.navigate("root_main") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("offers") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onProfileClick = {
+                            navController.navigate("registered_users") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
                         onDeleteOfferClick = { offerId ->
-                            // Aquí puedes implementar la lógica para eliminar una oferta
+                            // La lógica de eliminación ya está manejada dentro de ActiveAlertsOffersScreen
+                            // Por lo tanto, no es necesario repetirla aquí.
+                            // Si deseas manejar algo adicional, puedes hacerlo aquí.
                             val db = FirebaseFirestore.getInstance()
                             db.collection("offers").document(offerId).delete()
                                 .addOnSuccessListener {
@@ -158,9 +184,21 @@ class MainActivity : ComponentActivity() {
                                 .addOnFailureListener {
                                     Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
                                 }
+                        },
+                        onDeleteEventClick = { eventId ->
+                            // Similarmente, manejar la eliminación de eventos si es necesario
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("events").document(eventId).delete()
+                                .addOnSuccessListener {
+                                    Log.d("ActiveAlertsOffers", "Event deleted successfully")
+                                }
+                                .addOnFailureListener {
+                                    Log.e("ActiveAlertsOffers", "Error deleting event: ${it.message}")
+                                }
                         }
                     )
                 }
+
 
                 // Pantalla principal para Registered Users
                 composable("registered_users") {
@@ -178,16 +216,35 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onHomeClick = {
-                            navController.navigate("root_main")
+                            navController.navigate("root_main") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
                         },
                         onOffersClick = {
-                            navController.navigate("offers")
+                            navController.navigate("offers") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
                         },
                         onProfileClick = {
-                            navController.navigate("profile")
+                            navController.navigate("profile") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
                         }
                     )
                 }
+
+                // Otras pantallas de navegación
+                // Asegúrate de definir las rutas que navegan a "profile", "add_business", etc.
+                // Por ejemplo:
+                /*
+                composable("profile") {
+                    ProfileScreen(
+                        onLogoutClick = { /* ... */ },
+                        onHomeClick = { /* ... */ },
+                        // Otros callbacks
+                    )
+                }
+                */
             }
         }
 

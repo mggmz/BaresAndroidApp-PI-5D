@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-// Importaciones adicionales
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -30,13 +29,14 @@ import coil.compose.rememberImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun OwnerMainScreenContent(
     onAddBusinessClick: () -> Unit,
-    onAddOfferClick: () -> Unit,  // Agregado para manejar el clic en el ícono de la etiqueta
-    onLogoutClick: () -> Unit,  // Parámetro para redirigir a la pantalla de login después de cerrar sesión
-    onEditBusinessClick: (String) -> Unit  // Nuevo parámetro para manejar la navegación al editar negocio
+    onAddOfferClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+    onEditBusinessClick: (String) -> Unit
 ) {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -44,17 +44,16 @@ fun OwnerMainScreenContent(
     val currentUser = auth.currentUser
     val userUID = currentUser?.uid
 
-    var username by remember { mutableStateOf<String?>("@Your") }  // Estado para el username
+    var username by remember { mutableStateOf<String?>("@Your") }
     var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
     var loading by remember { mutableStateOf(true) }
 
-    // Para manejar la consulta en segundo plano
     LaunchedEffect(userUID) {
         if (userUID != null) {
             try {
                 // Obtener el username desde Firestore
                 val userDoc = db.collection("users").document(userUID).get().await()
-                username = userDoc.getString("username")?.let { "@$it's" } ?: "@Your"
+                username = userDoc.getString("username")?.let { "@$it" } ?: "@Your"
 
                 // Obtener los negocios del usuario y ordenarlos por fecha de creación
                 val businessDocs = db.collection("business")
@@ -62,7 +61,6 @@ fun OwnerMainScreenContent(
                     .get()
                     .await()
 
-                // Ordenar los negocios por el campo "createdAt" de manera descendente
                 businesses = businessDocs.documents.map { doc ->
                     val data = doc.data as MutableMap<String, Any>
                     data["id"] = doc.id  // Añadir el ID del documento como un campo más
@@ -141,7 +139,8 @@ fun OwnerMainScreenContent(
                             auth.signOut()
                             onLogoutClick()  // Redirigir al LoginScreen después de cerrar sesión
                         },
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
                             .padding(top = 10.dp)
                     ) {
                         Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
@@ -187,7 +186,7 @@ fun OwnerMainScreenContent(
                                     if (businessId != null) {
                                         onEditBusinessClick(businessId)
                                     }
-                                }  // Nueva funcionalidad al hacer clic
+                                }
                             )
                         }
                     }

@@ -26,13 +26,14 @@ import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun BusinessOwnerScreen(
     onAddEventClick: () -> Unit,
     onAddOfferClick: () -> Unit,
-    onEditEventClick: (String) -> Unit,  // Nuevo parámetro para editar eventos
-    onEditOfferClick: (String) -> Unit,  // Nuevo parámetro para editar ofertas
+    onEditEventClick: (String) -> Unit,
+    onEditOfferClick: (String) -> Unit,
     onLogoutClick: () -> Unit,
     onNavigateToHome: () -> Unit
 ) {
@@ -384,7 +385,7 @@ fun OfferCard(title: String, place: String, date: String, onClick: () -> Unit, o
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { onClick() },
+            .clickable { onClick() },  // Hacer que toda la tarjeta sea clickeable para editar
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -401,7 +402,7 @@ fun OfferCard(title: String, place: String, date: String, onClick: () -> Unit, o
             }
 
             IconButton(
-                onClick = { showDialog = true },
+                onClick = { showDialog = true },  // Mostrar el cuadro de diálogo de confirmación
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete Offer", tint = Color.Red)
@@ -419,4 +420,3 @@ fun OfferCard(title: String, place: String, date: String, onClick: () -> Unit, o
         )
     }
 }
-
