@@ -88,14 +88,23 @@ class MainActivity : ComponentActivity() {
 
                 // Pantalla principal para Root
                 composable("root_main") {
-                    ActiveAlertsOffersScreen(
-                        onDeleteOfferClick = { offerId ->
-                            val db = FirebaseFirestore.getInstance()
-                            db.collection("offers").document(offerId).delete().addOnSuccessListener {
-                                Log.d("ActiveAlertsOffers", "Offer deleted successfully")
-                            }.addOnFailureListener {
-                                Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
+                    RegisteredPlacesScreen(
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("root_main") { inclusive = true }
                             }
+                        },
+                        onHomeClick = {
+                            navController.navigate("root_main") {
+                                popUpTo("root_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("offers")
+                        },
+                        onProfileClick = {
+                            navController.navigate("registered_users")
                         }
                     )
                 }
@@ -136,36 +145,49 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Pantalla de Active Alerts & Offers
-                composable("active_alerts_offers") {
+                // Pantalla root offers
+                composable("offers") {
                     ActiveAlertsOffersScreen(
                         onDeleteOfferClick = { offerId ->
+                            // Aquí puedes implementar la lógica para eliminar una oferta
                             val db = FirebaseFirestore.getInstance()
-                            db.collection("offers").document(offerId).delete().addOnSuccessListener {
-                                Log.d("ActiveAlertsOffers", "Offer deleted successfully")
-                            }.addOnFailureListener {
-                                Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
-                            }
+                            db.collection("offers").document(offerId).delete()
+                                .addOnSuccessListener {
+                                    Log.d("ActiveAlertsOffers", "Offer deleted successfully")
+                                }
+                                .addOnFailureListener {
+                                    Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
+                                }
                         }
                     )
                 }
 
+                // Pantalla principal para Registered Users
                 composable("registered_users") {
                     RegisteredUsersScreen(
                         onEditUserClick = { userId ->
-                            navController.navigate("edit_user/$userId") // Navega a la pantalla de edición de usuario
+                            navController.navigate("edit_user/$userId")
                         },
                         onDeleteUserClick = { userId ->
-                            val db = FirebaseFirestore.getInstance()
-                            db.collection("users").document(userId).delete().addOnSuccessListener {
-                                Log.d("RegisteredUsers", "User deleted successfully")
-                            }.addOnFailureListener {
-                                Log.e("RegisteredUsers", "Error deleting user: ${it.message}")
+                            // Lógica de eliminación de usuario aquí si se necesita, o se deja al componente.
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("registered_users") { inclusive = true }
                             }
+                        },
+                        onHomeClick = {
+                            navController.navigate("root_main")
+                        },
+                        onOffersClick = {
+                            navController.navigate("offers")
+                        },
+                        onProfileClick = {
+                            navController.navigate("profile")
                         }
                     )
                 }
-
             }
         }
 
@@ -177,5 +199,3 @@ class MainActivity : ComponentActivity() {
                 )
     }
 }
-
-

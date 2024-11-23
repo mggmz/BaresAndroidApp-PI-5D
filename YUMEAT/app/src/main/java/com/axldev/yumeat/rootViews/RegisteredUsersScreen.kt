@@ -1,16 +1,20 @@
 package com.axldev.yumeat.rootViews
 
-
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,14 +33,21 @@ import kotlinx.coroutines.tasks.await
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisteredUsersScreen(
-    onEditUserClick: (String) -> Unit,  // Callback para editar usuario
-    onDeleteUserClick: (String) -> Unit  // Callback para eliminar usuario
+    onEditUserClick: (String) -> Unit,
+    onDeleteUserClick: (String) -> Unit,
+    onLogoutClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     val db = FirebaseFirestore.getInstance()
     var users by remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var showDialog by remember { mutableStateOf(false) }
+    var userToDelete by remember { mutableStateOf<String?>(null) }
+    var reloadUsers by remember { mutableStateOf(false) }
 
-    // Carga inicial de datos desde Firebase Firestore
-    LaunchedEffect(Unit) {
+    // Función para cargar los usuarios desde Firestore
+    suspend fun loadUsers() {
         try {
             val userDocs = db.collection("users").get().await()
             users = userDocs.documents.map { doc ->
@@ -47,52 +58,162 @@ fun RegisteredUsersScreen(
         }
     }
 
+    // Carga inicial de usuarios y recarga si reloadUsers cambia
+    LaunchedEffect(reloadUsers) {
+        loadUsers()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registered Users", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Registered Users",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 28.dp, top = 56.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White
+                ),
+                actions = {
+                    IconButton(
+                        onClick = {
+                            onLogoutClick()
+                        }
+                    ) {
+                        Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
+                    }
+                }
             )
         },
-        content = { padding ->
+        bottomBar = {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFF5F5F5))
-                    .padding(padding)
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (users.isEmpty()) {
-                        Text(
-                            text = "No users registered",
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            color = Color.Gray,
-                            fontSize = 16.sp
+                    IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Home",
+                            tint = Color.Gray
                         )
-                    } else {
-                        users.forEach { user ->
-                            val userId = user["userId"] as? String ?: ""
-                            val username = user["username"] as? String ?: "No Name"
-                            val email = user["email"] as? String ?: "No Email"
-
-                            if (userId.isNotEmpty()) {
-                                UserCard(
-                                    username = username,
-                                    email = email,
-                                    onEditClick = { onEditUserClick(userId) },
-                                    onDeleteClick = { onDeleteUserClick(userId) }
-                                )
-                            }
-                        }
+                    }
+                    IconButton(
+                        onClick = onOffersClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.LocalOffer,
+                            contentDescription = "Offers",
+                            tint = Color.Gray
+                        )
+                    }
+                    IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = "Profile",
+                            tint = Color.Gray
+                        )
                     }
                 }
             }
         }
-    )
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(padding)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (users.isEmpty()) {
+                    Text(
+                        text = "No users registered",
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        color = Color.Gray,
+                        fontSize = 16.sp
+                    )
+                } else {
+                    users.forEach { user ->
+                        val userId = user["userId"] as? String ?: ""
+                        val username = user["username"] as? String ?: "No Name"
+                        val email = user["email"] as? String ?: "No Email"
+
+                        if (userId.isNotEmpty()) {
+                            UserCard(
+                                username = username,
+                                email = email,
+                                onEditClick = { onEditUserClick(userId) },
+                                onDeleteClick = {
+                                    userToDelete = userId
+                                    showDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            userToDelete?.let {
+                                db.collection("users").document(it).delete()
+                                    .addOnSuccessListener {
+                                        showDialog = false
+                                        // Cambiar reloadUsers para recargar la lista
+                                        reloadUsers = !reloadUsers
+                                    }
+                                    .addOnFailureListener {
+                                        // Mostrar mensaje de error si es necesario
+                                        showDialog = false
+                                    }
+                            }
+                        }) {
+                            Text("Confirm")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Delete User") },
+                    text = { Text("Are you sure you want to delete this user?") }
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -106,9 +227,9 @@ fun UserCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { onEditClick() },  // La tarjeta es clickeable para editar
+            .clickable { onEditClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
             modifier = Modifier
@@ -116,9 +237,8 @@ fun UserCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono de usuario
             Image(
-                painter = painterResource(id = R.drawable.user_placeholder), // Reemplaza con tu recurso de imagen
+                painter = painterResource(id = R.drawable.user_placeholder),
                 contentDescription = "User Icon",
                 modifier = Modifier
                     .size(48.dp)
@@ -132,21 +252,10 @@ fun UserCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = username, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(text = email, fontSize = 14.sp, color = Color.Gray)
-                Text(text = "PLACE OWNER", fontSize = 12.sp, color = Color.Gray)
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Botón de editar
-            IconButton(onClick = { onEditClick() }) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "Edit User",
-                    tint = Color(0xFFFFA500)
-                )
-            }
-
-            // Botón de eliminar
             IconButton(onClick = { onDeleteClick() }) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
@@ -157,4 +266,3 @@ fun UserCard(
         }
     }
 }
-

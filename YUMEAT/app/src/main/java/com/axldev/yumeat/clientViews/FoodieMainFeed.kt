@@ -228,6 +228,3 @@ fun BottomNavigationBar() {
 fun FoodieMainFeedPreview() {
     FoodieMainFeed()
 }
-
-
-
