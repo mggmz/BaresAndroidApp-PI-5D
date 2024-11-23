@@ -67,35 +67,26 @@ fun FoodieMainFeed(
 
 @Composable
 fun HeaderSection() {
-    Column(
+    Box(
         modifier = Modifier
-            .padding(16.dp)
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        /*Image(
-            painter = painterResource(id = R.drawable.applogo), // Asegúrate de que el logo esté en la carpeta drawable
-            contentDescription = "Yum Eat Logo",
+        Image(
+            painter = painterResource(id = R.drawable.applogo),
+            contentDescription = "YumEat Logo",
             modifier = Modifier
-                .size(225.dp)
-                .padding(start = 70.dp, top = 0.dp),
+                .size(205.dp),
             contentScale = ContentScale.Fit
-        )*/
-        Text(
-            text = "YumEat",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
         )
         Text(
             text = "Get some food!!",
             fontSize = 16.sp,
-            color = Color.Gray
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Manzanillo, Colima",
-            fontSize = 14.sp,
-            color = Color(0xFF7B7B7B),
-            fontWeight = FontWeight.Medium
+            color = Color.Black,
+            modifier = Modifier
+                .padding(top = 156.dp)
+
         )
     }
 }
