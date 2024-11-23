@@ -282,21 +282,3 @@ fun formatDate(timestamp: Long): String {
     val format = java.text.SimpleDateFormat("dd-MM-yyyy", java.util.Locale.getDefault())
     return format.format(date)
 }
-
-@Preview(showBackground = true)
-@Composable
-fun RegisteredPlacesScreenPreview() {
-    RegisteredPlacesScreen()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PlaceCardPreview() {
-    PlaceCard(
-        name = "Sample Place",
-        address = "123 Example St, City",
-        imageUrl = null,
-        date = "Added at: 22-11-2024",
-        onDeleteClick = {}
-    )
-}
