@@ -77,7 +77,7 @@ fun HeaderSection() {
             painter = painterResource(id = R.drawable.applogo),
             contentDescription = "YumEat Logo",
             modifier = Modifier
-                .size(205.dp),
+                .size(135.dp),
             contentScale = ContentScale.Fit
         )
         Text(

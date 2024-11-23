@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -101,6 +102,16 @@ fun BottomNavigationBar(
             Icon(
                 Icons.Filled.Home,
                 contentDescription = "Home",
+                tint = Color.Gray
+            )
+        }
+        IconButton(
+            onClick = onOffersClick,
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                Icons.Filled.Favorite,
+                contentDescription = "Favorites",
                 tint = Color.Gray
             )
         }
