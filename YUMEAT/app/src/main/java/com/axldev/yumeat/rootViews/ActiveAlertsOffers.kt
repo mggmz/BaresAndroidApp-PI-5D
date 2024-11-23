@@ -148,3 +148,7 @@ fun OfferCard(
         }
     }
 }
+
+
+
+
