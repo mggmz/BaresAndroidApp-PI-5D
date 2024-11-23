@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.rememberImagePainter
+import com.axldev.yumeat.R
 
 @Composable
 fun FoodieMainFeed(
@@ -70,6 +71,14 @@ fun HeaderSection() {
         modifier = Modifier
             .padding(16.dp)
     ) {
+        /*Image(
+            painter = painterResource(id = R.drawable.applogo), // Asegúrate de que el logo esté en la carpeta drawable
+            contentDescription = "Yum Eat Logo",
+            modifier = Modifier
+                .size(225.dp)
+                .padding(start = 70.dp, top = 0.dp),
+            contentScale = ContentScale.Fit
+        )*/
         Text(
             text = "YumEat",
             fontSize = 28.sp,
@@ -158,9 +167,6 @@ fun RestaurantGrid() {
     // Mock Data
     val restaurants = listOf(
         Restaurant("El Terral By Brisas", "Gourmet", "$$$", "10 AM - 10 PM", "1.2 km"),
-        Restaurant("Oasis Ocean Club", "Gourmet", "$$", "10 AM - 10 PM", "0.5 km"),
-        Restaurant("Monster Burguer", "Fast Food", "$$", "10 AM - 10 PM", "1.4 km"),
-        Restaurant("Daruma", "Japanese", "$$$", "10 AM - 10 PM", "1.4 km")
     )
 
     LazyVerticalGrid(
