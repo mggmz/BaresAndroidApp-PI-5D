@@ -31,12 +31,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.rememberImagePainter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FoodieMainFeed() {
+fun FoodieMainFeed(
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
     // Estructura principal con Scaffold
     Scaffold(
-        bottomBar = { BottomNavigationBar() }, // Acopla el BottomBar
+        bottomBar = { BottomNavigationBar(
+            onHomeClick = onHomeClick,
+            onOffersClick = onOffersClick,
+            onProfileClick = onProfileClick
+        ) }, // Acopla el BottomBar
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Column(
@@ -201,30 +208,12 @@ fun RestaurantCard(restaurant: Restaurant) {
     }
 }
 
-@Composable
-fun BottomNavigationBar() {
-    BottomAppBar(
-        containerColor = Color(0xFFE9E9E9),
-        contentColor = Color.Gray,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        IconButton(onClick = { /* TODO */ }) {
-            Icon(imageVector = Icons.Default.Star, contentDescription = "Favorites")
-        }
-        IconButton(onClick = { /* TODO */ }) {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-        }
-        IconButton(onClick = { /* TODO */ }) {
-            Icon(imageVector = Icons.Default.LocalOffer, contentDescription = "Offers")
-        }
-        IconButton(onClick = { /* TODO */ }) {
-            Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun FoodieMainFeedPreview() {
-    FoodieMainFeed()
+    FoodieMainFeed(
+        onHomeClick = {},
+        onOffersClick = {},
+        onProfileClick = {}
+    )
 }

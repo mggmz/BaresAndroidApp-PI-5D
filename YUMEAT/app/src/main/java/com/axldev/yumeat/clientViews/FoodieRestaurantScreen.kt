@@ -29,9 +29,17 @@ import androidx.compose.ui.draw.clip
 
 
 @Composable
-fun FoodieRestaurantScreen() {
+fun FoodieRestaurantScreen(
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
     Scaffold(
-        bottomBar = { BottomNavigationBar() }, // BottomBar reutilizado
+        bottomBar = { BottomNavigationBar(
+            onHomeClick = onHomeClick,
+            onOffersClick = onOffersClick,
+            onProfileClick = onProfileClick
+        ) }, // BottomBar reutilizado
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Column(
@@ -250,5 +258,9 @@ fun FoodieRestaurantScreen() {
 @Preview(showBackground = true)
 @Composable
 fun FoodieRestaurantScreenPreview() {
-    FoodieRestaurantScreen()
+    FoodieRestaurantScreen(
+        onHomeClick = {},
+        onOffersClick = {},
+        onProfileClick = {}
+    )
 }
