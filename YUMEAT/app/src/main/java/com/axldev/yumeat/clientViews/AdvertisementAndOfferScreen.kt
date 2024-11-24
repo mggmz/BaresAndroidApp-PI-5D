@@ -29,7 +29,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 data class Advertisement(
     val id: Int,
@@ -59,16 +58,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val systemUiController = rememberSystemUiController()
-            SideEffect {
-                systemUiController.apply {
-                    isSystemBarsVisible = false
-                    isNavigationBarVisible = false
-                    isStatusBarVisible = false
-                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                }
-            }
-
             AdvertisementAndOfferScreen()
         }
     }
@@ -123,18 +112,13 @@ fun AdvertisementAndOfferScreen() {
     var offers by remember { mutableStateOf(listOf<Advertisement>()) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-            Text(
-                text = "YumEat\nGet some food!!",
-                textAlign = TextAlign.Center,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp)
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        ) {
+
+            HeaderSection()
 
             Card(
                 modifier = Modifier
