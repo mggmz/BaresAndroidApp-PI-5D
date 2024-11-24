@@ -51,21 +51,27 @@ fun FoodieProfileScreen(
         },
         modifier = Modifier.fillMaxSize(),
         backgroundColor = backgroundColor
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             //Imagen de fondo
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(200.dp)
                     .background(Color.LightGray),
                 contentAlignment = Alignment.TopEnd
             ) {
+                Image(
+                    painter = painterResource(id = R.drawable.placeholder_image), //Imagen Dummy
+                    contentDescription = "Foodie Background Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
                 IconButton(
                     onClick = { /* Acción para editar fondo */ },
                     modifier = Modifier
@@ -92,7 +98,7 @@ fun FoodieProfileScreen(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.user_placeholder), //Reemplaza con la imagen real
+                    painter = painterResource(id = R.drawable.user_placeholder2), //Reemplaza con la imagen real
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(140.dp)
