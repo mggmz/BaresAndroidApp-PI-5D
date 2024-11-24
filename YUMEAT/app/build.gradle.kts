@@ -103,6 +103,23 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-analytics")
 
+
+
+    implementation ("com.google.firebase:firebase-firestore-ktx:24.4.0")
+    implementation ("androidx.compose.ui:ui:1.4.3")
+    implementation ("androidx.compose.material:material:1.4.3")
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.4.3")
+    implementation ("androidx.activity:activity-compose:1.6.1")
+
+
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:<versión>")
+
+
+
+
+
+
 }
 
 
