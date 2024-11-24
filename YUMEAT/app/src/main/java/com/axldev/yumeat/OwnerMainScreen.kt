@@ -185,6 +185,9 @@ fun OwnerMainScreenContent(
                                     val businessId = business["id"] as? String
                                     if (businessId != null) {
                                         onEditBusinessClick(businessId)
+                                    } else {
+                                        // Manejar el caso donde `businessId` sea nulo o inválido
+                                        println("Error: businessId is null or invalid")
                                     }
                                 }
                             )
@@ -195,7 +198,9 @@ fun OwnerMainScreenContent(
 
             // FloatingActionButton más grande y alineado a la derecha
             FloatingActionButton(
-                onClick = onAddBusinessClick,
+                onClick = {
+                    onAddBusinessClick()
+                },
                 shape = CircleShape,
                 containerColor = Color(0xFF0072A3),
                 modifier = Modifier

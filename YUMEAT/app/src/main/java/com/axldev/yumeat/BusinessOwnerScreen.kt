@@ -35,7 +35,8 @@ fun BusinessOwnerScreen(
     onEditEventClick: (String) -> Unit,
     onEditOfferClick: (String) -> Unit,
     onLogoutClick: () -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit,
+    onNavigateToOffers: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf("Events") }
     val auth = FirebaseAuth.getInstance()
@@ -67,7 +68,7 @@ fun BusinessOwnerScreen(
                         )
                     }
                     IconButton(
-                        onClick = onAddOfferClick,
+                        onClick = onNavigateToOffers,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(

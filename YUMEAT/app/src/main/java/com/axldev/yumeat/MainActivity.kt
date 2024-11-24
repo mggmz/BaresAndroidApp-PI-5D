@@ -7,9 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.axldev.yumeat.clientViews.UserMainScreenContent
 import com.axldev.yumeat.rootViews.ActiveAlertsOffersScreen
 import com.axldev.yumeat.rootViews.RegisteredUsersScreen
@@ -65,14 +67,29 @@ class MainActivity : ComponentActivity() {
                             authViewModel.loginUser(email, password) { userType ->
                                 when (userType) {
                                     "root" -> {
-                                        navController.navigate("root_main") { popUpTo("login") { inclusive = true } }
+                                        navController.navigate("root_main") {
+                                            popUpTo("login") {
+                                                inclusive = true
+                                            }
+                                        }
                                     }
+
                                     "vendedor" -> {
-                                        navController.navigate("owner_main") { popUpTo("login") { inclusive = true } }
+                                        navController.navigate("owner_main") {
+                                            popUpTo("login") {
+                                                inclusive = true
+                                            }
+                                        }
                                     }
+
                                     "cliente" -> {
-                                        navController.navigate("client_main") { popUpTo("login") { inclusive = true } }
+                                        navController.navigate("client_main") {
+                                            popUpTo("login") {
+                                                inclusive = true
+                                            }
+                                        }
                                     }
+
                                     else -> {
                                         // Manejo de error si el userType es null o no válido
                                         Log.d("MainActivity", "User type not found or invalid")
@@ -147,7 +164,118 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-// Dentro del NavHost en MainActivity.kt
+                //Add Business
+                composable("add_business") {
+                    AddBusinessScreen(
+                        onBusinessAdded = {
+                            // Regresa a OwnerMainScreen después de añadir el negocio
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("offers") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Edit Business
+                composable(
+                    route = "edit_business/{businessId}",
+                    arguments = listOf(navArgument("businessId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val businessId = backStackEntry.arguments?.getString("businessId") ?: ""
+                    EditBusinessScreen(
+                        businessId = businessId,
+                        onBusinessUpdated = {
+                            navController.popBackStack() // Vuelve a la pantalla anterior después de actualizar
+                        },
+                        onBusinessDeleted = {
+                            navController.popBackStack() // Vuelve a la pantalla anterior después de eliminar
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("offers") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable("business_owner") {
+                    BusinessOwnerScreen(
+                        onAddEventClick = {
+                            navController.navigate("add_event")
+                        },
+                        onAddOfferClick = {
+                            navController.navigate("add_offer")
+                        },
+                        onEditEventClick = { eventId ->
+                            navController.navigate("edit_event/$eventId")
+                        },
+                        onEditOfferClick = { offerId ->
+                            navController.navigate("edit_offer/$offerId")
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            if (navController.currentDestination?.route != "business_owner") {
+                                navController.navigate("business_owner") {
+                                    popUpTo("business_owner") { inclusive = true }
+                                }
+                            }
+                        }
+                    )
+                }
+
+                composable("add_event") {
+                    AddEventScreen(
+                        onEventAdded = {
+                            navController.popBackStack() // Regresa a "business_owner" después de agregar un evento
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") // Navega al Home del dueño
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("offers") // Navega a la pantalla de Ofertas
+                        }
+                    )
+                }
+
+                composable("add_offer") {
+                    AddOfferScreen(
+                        onOfferAdded = {
+                            navController.popBackStack() // Regresa a "business_owner" después de agregar una oferta
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") // Navega al Home del dueño
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("offers") // Navega a la pantalla de Ofertas
+                        }
+                    )
+                }
+
 
                 composable("offers") {
                     ActiveAlertsOffersScreen(
@@ -182,7 +310,10 @@ class MainActivity : ComponentActivity() {
                                     Log.d("ActiveAlertsOffers", "Offer deleted successfully")
                                 }
                                 .addOnFailureListener {
-                                    Log.e("ActiveAlertsOffers", "Error deleting offer: ${it.message}")
+                                    Log.e(
+                                        "ActiveAlertsOffers",
+                                        "Error deleting offer: ${it.message}"
+                                    )
                                 }
                         },
                         onDeleteEventClick = { eventId ->
@@ -193,7 +324,10 @@ class MainActivity : ComponentActivity() {
                                     Log.d("ActiveAlertsOffers", "Event deleted successfully")
                                 }
                                 .addOnFailureListener {
-                                    Log.e("ActiveAlertsOffers", "Error deleting event: ${it.message}")
+                                    Log.e(
+                                        "ActiveAlertsOffers",
+                                        "Error deleting event: ${it.message}"
+                                    )
                                 }
                         }
                     )
@@ -233,26 +367,13 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Otras pantallas de navegación
-                // Asegúrate de definir las rutas que navegan a "profile", "add_business", etc.
-                // Por ejemplo:
-                /*
-                composable("profile") {
-                    ProfileScreen(
-                        onLogoutClick = { /* ... */ },
-                        onHomeClick = { /* ... */ },
-                        // Otros callbacks
-                    )
-                }
-                */
+                // Oculta la barra de navegación y la barra de estado
+                window.decorView.systemUiVisibility = (
+                        View.SYSTEM_UI_FLAG_FULLSCREEN
+                                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        )
             }
         }
-
-        // Oculta la barra de navegación y la barra de estado
-        window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                )
     }
 }
