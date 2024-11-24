@@ -208,21 +208,6 @@ fun AdvertisementAndOfferScreen() {
                 }
             }
         }
-
-        FloatingActionButton(
-            onClick = { },
-            backgroundColor = Color(0xFF005FAF),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .offset(y = (-72).dp),
-            elevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = 6.dp,
-                pressedElevation = 8.dp
-            )
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add", tint = Color.White)
-        }
     }
 }
 

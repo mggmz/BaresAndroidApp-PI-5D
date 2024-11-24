@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Facebook
 import androidx.compose.ui.draw.clip
+import com.axldev.yumeat.R
 
 
 @Composable
@@ -55,7 +56,7 @@ fun FoodieRestaurantScreen(
                     .height(240.dp)
             ) {
                 Image(
-                    painter = painterResource(id = android.R.drawable.ic_menu_gallery), // Imagen de fondo (Dummy)
+                    painter = painterResource(id = R.drawable.placeholder_image), // Imagen de fondo (Dummy)
                     contentDescription = "Restaurant Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -163,7 +164,7 @@ fun FoodieRestaurantScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = android.R.drawable.ic_menu_gallery), // Imagen de promoción
+                        painter = painterResource(id = R.drawable.placeholder_image), // Imagen de promoción
                         contentDescription = "Promotion Image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -206,7 +207,6 @@ fun FoodieRestaurantScreen(
                         Text(
                             text = "$150 USD",
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
                             color = Color.Green
                         )
                     }
@@ -227,27 +227,36 @@ fun FoodieRestaurantScreen(
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Horario: 5 PM - 12 AM",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    IconButton(onClick = { /* Facebook Link */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Facebook,
-                            contentDescription = "Facebook",
-                            tint = Color.Black
-                        )
-                    }
-                    IconButton(onClick = { /* Instagram Link */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Facebook,
-                            contentDescription = "Instagram",
-                            tint = Color.Black
-                        )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Horario: 5 PM - 12 AM",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        IconButton(onClick = { /* Facebook Link */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Facebook,
+                                contentDescription = "Facebook",
+                                tint = Color.Black,
+                                modifier = Modifier.size(28.dp) // Tamaño ajustado
+                            )
+                        }
+                        IconButton(onClick = { /* Instagram Link */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Facebook,
+                                contentDescription = "Instagram",
+                                tint = Color.Black,
+                                modifier = Modifier.size(28.dp) // Tamaño ajustado
+                            )
+                        }
                     }
                 }
             }

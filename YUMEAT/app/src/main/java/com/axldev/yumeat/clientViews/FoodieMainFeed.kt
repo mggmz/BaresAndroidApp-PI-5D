@@ -10,10 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,7 +81,7 @@ fun HeaderSection() {
             fontSize = 16.sp,
             color = Color.Black,
             modifier = Modifier
-                .padding(top = 156.dp)
+                .padding(top = 126.dp)
 
         )
     }
@@ -138,7 +134,7 @@ fun SearchAndFilterSection() {
 fun Chip(text: String) {
     Box(
         modifier = Modifier
-            .background(color = Color(0xFFE6F8F2), shape = RoundedCornerShape(8.dp))
+            .background(color = Color(0xFFE6F8F0), shape = RoundedCornerShape(8.dp))
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(text = text, color = Color.Black, fontSize = 14.sp)
@@ -180,30 +176,40 @@ fun RestaurantCard(restaurant: Restaurant) {
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFFFFFFF))
+        ) {
             Image(
-                painter = painterResource(id = android.R.drawable.ic_menu_gallery), // Dummy Image for Preview
+                painter = painterResource(id = R.drawable.placeholder_image), //Prop
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .clip(RoundedCornerShape(12.dp))
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = restaurant.name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(text = restaurant.type, color = Color.Gray, fontSize = 14.sp)
-            Text(text = restaurant.hours, color = Color.Gray, fontSize = 14.sp)
-            Text(text = restaurant.distance, color = Color.Blue, fontSize = 14.sp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = restaurant.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Black
+                )
+                Text(text = restaurant.type, color = Color.Gray, fontSize = 14.sp)
+                Text(text = restaurant.hours, color = Color.Gray, fontSize = 14.sp)
+                Text(text = restaurant.distance, color = Color.Blue, fontSize = 14.sp)
+            }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
