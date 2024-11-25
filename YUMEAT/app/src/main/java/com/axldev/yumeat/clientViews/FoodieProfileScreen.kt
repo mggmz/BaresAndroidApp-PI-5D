@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.Icons
@@ -39,7 +40,7 @@ fun FoodieProfileScreen(
     val backgroundColor = Color(0xFFFFFFFF)
     val buttonChangePasswordColor = Color(0xFFFFBA8F)
     val buttonRecoverPasswordColor = Color(0xFF0072A3)
-    val buttonLogoutColor = Color.Black
+    val buttonLogoutColor = Color(0xFF2C2C2C)
 
     Scaffold(
         bottomBar = {
@@ -124,7 +125,7 @@ fun FoodieProfileScreen(
 
             //Nombre y descripción
             Text(
-                text = "Fernanda Ortiz",
+                text = "Username",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 color = Color.Black
@@ -147,7 +148,7 @@ fun FoodieProfileScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Fernanda Kristell Ortiz Gutierrez",
+                text = "Username",
                 fontSize = 16.sp,
                 color = Color.Black
             )
@@ -194,23 +195,6 @@ fun FoodieProfileScreen(
                         textAlign = TextAlign.Center,
                         text = "Cambiar\nContraseña",
                         color = Color.Black
-                    )
-                }
-
-                Button(
-                    onClick = { /* Acción para recuperar contraseña */ },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = buttonRecoverPasswordColor),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp)
-                        .height(57.dp),
-                    contentPadding = PaddingValues(vertical = 12.dp) //Centrar texto verticalmente
-                ) {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = "Recuperar\nContraseña",
-                        color = Color.White
                     )
                 }
             }

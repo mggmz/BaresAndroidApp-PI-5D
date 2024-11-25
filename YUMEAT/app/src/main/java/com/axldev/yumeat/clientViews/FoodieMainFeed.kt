@@ -102,12 +102,6 @@ fun SearchAndFilterSection() {
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.FilterList,
-                contentDescription = "Filter Icon",
-                tint = Color.Gray,
-                modifier = Modifier.padding(start = 12.dp)
-            )
             TextField(
                 value = "",
                 onValueChange = {},
@@ -120,24 +114,6 @@ fun SearchAndFilterSection() {
                 modifier = Modifier.fillMaxWidth()
             )
         }
-
-        // Selected Filters
-        Row(modifier = Modifier.padding(vertical = 8.dp)) {
-            Chip(text = "Sushi")
-            Spacer(modifier = Modifier.width(8.dp))
-            Chip(text = "Some filter")
-        }
-    }
-}
-
-@Composable
-fun Chip(text: String) {
-    Box(
-        modifier = Modifier
-            .background(color = Color(0xFFE6F8F0), shape = RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(text = text, color = Color.Black, fontSize = 14.sp)
     }
 }
 
@@ -209,7 +185,6 @@ fun RestaurantCard(restaurant: Restaurant) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

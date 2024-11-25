@@ -20,11 +20,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Facebook
 import androidx.compose.ui.draw.clip
 import com.axldev.yumeat.R
 
@@ -126,20 +123,6 @@ fun FoodieRestaurantScreen(
                     modifier = Modifier.height(120.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { /* Ver más fotos */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Image,
-                            contentDescription = "See More Photos",
-                            tint = Color.Black
-                        )
-                    }
-                    IconButton(onClick = { /* Ver menú */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color.Black
-                        )
-                    }
                     IconButton(onClick = { /* Añadir a favoritos */ }) {
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
@@ -163,16 +146,14 @@ fun FoodieRestaurantScreen(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.placeholder_image), // Imagen de promoción
-                        contentDescription = "Promotion Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    )
+
                     Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "PROMCIONES/EVENTOS",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
                     Text(
                         text = "Tacos de New York",
                         fontSize = 16.sp,
@@ -191,24 +172,7 @@ fun FoodieRestaurantScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = "Likes",
-                                tint = Color.Red
-                            )
-                            Text(
-                                text = "800 Opiniones",
-                                fontSize = 14.sp,
-                                color = Color.Black,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
-                        Text(
-                            text = "$150 USD",
-                            fontSize = 16.sp,
-                            color = Color.Green
-                        )
+
                     }
                 }
             }
@@ -240,24 +204,6 @@ fun FoodieRestaurantScreen(
                         fontSize = 16.sp,
                         color = Color.Gray
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        IconButton(onClick = { /* Facebook Link */ }) {
-                            Icon(
-                                imageVector = Icons.Default.Facebook,
-                                contentDescription = "Facebook",
-                                tint = Color.Black,
-                                modifier = Modifier.size(28.dp) // Tamaño ajustado
-                            )
-                        }
-                        IconButton(onClick = { /* Instagram Link */ }) {
-                            Icon(
-                                imageVector = Icons.Default.Facebook,
-                                contentDescription = "Instagram",
-                                tint = Color.Black,
-                                modifier = Modifier.size(28.dp) // Tamaño ajustado
-                            )
-                        }
-                    }
                 }
             }
         }
