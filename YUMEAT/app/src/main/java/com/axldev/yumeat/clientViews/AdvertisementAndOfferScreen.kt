@@ -58,7 +58,11 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            AdvertisementAndOfferScreen()
+            AdvertisementAndOfferScreen(
+                onHomeClick = { /* No action for preview */ },
+                onOffersClick = { /* No action for preview */ },
+                onProfileClick = { /* No action for preview */ }
+            )
         }
     }
 }
@@ -106,86 +110,103 @@ fun AnimatedSelectionButton(
 }
 
 @Composable
-fun AdvertisementAndOfferScreen() {
+fun AdvertisementAndOfferScreen(
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
     var currentView by remember { mutableStateOf("Advertisement") }
     var advertisements by remember { mutableStateOf(listOf<Advertisement>()) }
     var offers by remember { mutableStateOf(listOf<Advertisement>()) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                onHomeClick = onHomeClick,
+                onOffersClick = onOffersClick,
+                onProfileClick = onProfileClick
+            )
+        }
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(paddingValues)
         ) {
-
-            HeaderSection()
-
-            Card(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
-                shape = RoundedCornerShape(50),
-                elevation = 4.dp,
-                backgroundColor = Color.LightGray
+                    .fillMaxSize()
+                    .padding(16.dp),
             ) {
-                Row(
+                HeaderSection()
+
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    shape = RoundedCornerShape(50),
+                    elevation = 4.dp,
+                    backgroundColor = Color.LightGray
                 ) {
-                    AnimatedSelectionButton(
-                        text = "Advertisement",
-                        isSelected = currentView == "Advertisement",
-                        onClick = { currentView = "Advertisement" },
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    )
-
-                    AnimatedSelectionButton(
-                        text = "Offer",
-                        isSelected = currentView == "Offer",
-                        onClick = { currentView = "Offer" },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            when (currentView) {
-                "Advertisement" -> {
-                    if (advertisements.isEmpty()) {
-                        Text(
-                            text = "No advertisements available",
-                            style = MaterialTheme.typography.h6,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    ) {
+                        AnimatedSelectionButton(
+                            text = "Advertisement",
+                            isSelected = currentView == "Advertisement",
+                            onClick = { currentView = "Advertisement" },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                         )
-                    } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(advertisements.size) { index ->
-                                val ad = advertisements[index]
-                                AdvertisementItem(advertisement = ad)
+
+                        AnimatedSelectionButton(
+                            text = "Offer",
+                            isSelected = currentView == "Offer",
+                            onClick = { currentView = "Offer" },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                when (currentView) {
+                    "Advertisement" -> {
+                        if (advertisements.isEmpty()) {
+                            Text(
+                                text = "No advertisements available",
+                                style = MaterialTheme.typography.h6,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        } else {
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                items(advertisements.size) { index ->
+                                    val ad = advertisements[index]
+                                    AdvertisementItem(advertisement = ad)
+                                }
                             }
                         }
                     }
-                }
-                "Offer" -> {
-                    if (offers.isEmpty()) {
-                        Text(
-                            text = "No offers available",
-                            style = MaterialTheme.typography.h6,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(offers.size) { index ->
-                                val offer = offers[index]
-                                OfferItem(offer = offer)
+                    "Offer" -> {
+                        if (offers.isEmpty()) {
+                            Text(
+                                text = "No offers available",
+                                style = MaterialTheme.typography.h6,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        } else {
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                items(offers.size) { index ->
+                                    val offer = offers[index]
+                                    OfferItem(offer = offer)
+                                }
                             }
                         }
                     }
@@ -262,5 +283,9 @@ fun OfferItem(offer: Advertisement) {
 @Preview(showBackground = true)
 @Composable
 fun AdvertisementAndOfferPreview() {
-    AdvertisementAndOfferScreen()
+    AdvertisementAndOfferScreen(
+        onHomeClick = { /* No action for preview */ },
+        onOffersClick = { /* No action for preview */ },
+        onProfileClick = { /* No action for preview */ }
+    )
 }
