@@ -169,8 +169,8 @@ class MainActivity : ComponentActivity() {
                     AddBusinessScreen(
                         onBusinessAdded = {
                             // Regresa a OwnerMainScreen después de añadir el negocio
-                            navController.navigate("owner_main") {
-                                popUpTo("owner_main") { inclusive = true }
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
                             }
                         },
                         onNavigateToHome = {
@@ -179,8 +179,8 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onNavigateToOffers = {
-                            navController.navigate("offers") {
-                                popUpTo("owner_main") { inclusive = true }
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
                             }
                         }
                     )
@@ -206,8 +206,8 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onNavigateToOffers = {
-                            navController.navigate("offers") {
-                                popUpTo("owner_main") { inclusive = true }
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
                             }
                         }
                     )
