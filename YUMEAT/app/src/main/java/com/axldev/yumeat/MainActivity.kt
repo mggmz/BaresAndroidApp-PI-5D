@@ -248,16 +248,78 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Edit Event
+                composable("edit_event/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+                    EditEventScreen(
+                        eventId = eventId,
+                        onEventUpdated = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onEventDeleted = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Edit Offer
+                composable("edit_offer/{offerId}") { backStackEntry ->
+                    val offerId = backStackEntry.arguments?.getString("offerId") ?: return@composable
+                    EditOfferScreen(
+                        offerId = offerId,
+                        onOfferUpdated = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onOfferDeleted = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 composable("add_event") {
                     AddEventScreen(
                         onEventAdded = {
-                            navController.popBackStack() // Regresa a "business_owner" después de agregar un evento
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen después de añadir un evento
+                                popUpTo("business_owner") { inclusive = true }
+                            }
                         },
                         onNavigateToHome = {
-                            navController.navigate("owner_main") // Navega al Home del dueño
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
                         },
                         onNavigateToOffers = {
-                            navController.navigate("offers") // Navega a la pantalla de Ofertas
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen
+                                popUpTo("business_owner") { inclusive = true }
+                            }
                         }
                     )
                 }
@@ -271,7 +333,7 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("owner_main") // Navega al Home del dueño
                         },
                         onNavigateToOffers = {
-                            navController.navigate("offers") // Navega a la pantalla de Ofertas
+                            navController.navigate("business_owner") // Navega a la pantalla de Ofertas
                         }
                     )
                 }
