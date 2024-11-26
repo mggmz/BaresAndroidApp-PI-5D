@@ -32,53 +32,10 @@ import android.util.Log
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
-fun AnimatedSelectionButton(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
-
-    Box(
-        modifier = modifier
-            .scale(scale)
-            .background(
-                color = if (isSelected) Color(0xFFFFA500) else Color.Transparent,
-                shape = RoundedCornerShape(50)
-            )
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (isSelected) Color.White else Color.Black,
-            modifier = Modifier.clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-        )
-    }
-}
-
-@Composable
 fun AdvertisementAndOfferScreen(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onLikesClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     var currentView by remember { mutableStateOf("Advertisement") }
@@ -86,50 +43,30 @@ fun AdvertisementAndOfferScreen(
     var offers by remember { mutableStateOf(listOf<Map<String, Any>>()) }
 
     val db = FirebaseFirestore.getInstance()
-    var adsListenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
-    var offersListenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
 
     // Load advertisements (events) from Firebase
     LaunchedEffect(Unit) {
-        adsListenerRegistration = db.collection("events")
-            .whereEqualTo("active", true)
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.e("AdvertisementScreen", "Error fetching events: ${e.message}")
-                    return@addSnapshotListener
-                }
-                if (snapshots != null) {
-                    advertisements = snapshots.documents.mapNotNull { doc ->
-                        val data = doc.data
-                        data?.also { it["id"] = doc.id }
-                    }
-                }
+        try {
+            val eventsSnapshot = db.collection("events").get().await()
+            advertisements = eventsSnapshot.documents.mapNotNull { doc ->
+                val data = doc.data
+                data?.also { it["id"] = doc.id }
             }
+        } catch (e: Exception) {
+            Log.e("AdvertisementScreen", "Error fetching events: ${e.message}")
+        }
     }
 
     // Load offers from Firebase
     LaunchedEffect(Unit) {
-        offersListenerRegistration = db.collection("offers")
-            .whereEqualTo("active", true)
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.e("AdvertisementScreen", "Error fetching offers: ${e.message}")
-                    return@addSnapshotListener
-                }
-                if (snapshots != null) {
-                    offers = snapshots.documents.mapNotNull { doc ->
-                        val data = doc.data
-                        data?.also { it["id"] = doc.id }
-                    }
-                }
+        try {
+            val offersSnapshot = db.collection("offers").get().await()
+            offers = offersSnapshot.documents.mapNotNull { doc ->
+                val data = doc.data
+                data?.also { it["id"] = doc.id }
             }
-    }
-
-    // Cancel the listeners when the Composable is destroyed
-    DisposableEffect(Unit) {
-        onDispose {
-            adsListenerRegistration?.remove()
-            offersListenerRegistration?.remove()
+        } catch (e: Exception) {
+            Log.e("AdvertisementScreen", "Error fetching offers: ${e.message}")
         }
     }
 
@@ -138,10 +75,13 @@ fun AdvertisementAndOfferScreen(
             TopAppBar(
                 title = {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        // Icono Logout
                         IconButton(onClick = onLogoutClick) {
                             Icon(
                                 imageVector = Icons.Default.ExitToApp,
@@ -149,25 +89,24 @@ fun AdvertisementAndOfferScreen(
                                 tint = Color.Gray
                             )
                         }
+                        // Logo YumEat
                         Image(
                             painter = painterResource(id = R.drawable.applogo),
                             contentDescription = "YumEat Logo",
                             modifier = Modifier
                                 .size(100.dp)
-                                .align(Alignment.CenterVertically)
                         )
                     }
                 },
-                backgroundColor = Color.White,
-                elevation = 4.dp
+                backgroundColor = Color.White, // Fondo blanco
+                elevation = 4.dp // Sombra del TopAppBar
             )
         },
         bottomBar = {
             BottomNavigationBar(
                 onHomeClick = onHomeClick,
                 onOffersClick = onOffersClick,
-                onProfileClick = onProfileClick,
-                onLikesClick = onLikesClick
+                onProfileClick = onProfileClick
             )
         }
     ) { paddingValues ->
@@ -358,7 +297,6 @@ fun BottomNavigationBar(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onLikesClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -394,7 +332,6 @@ fun BottomNavigationBar(
                     tint = Color.Gray
                 )
             }
-
             IconButton(
                 onClick = onProfileClick,
                 modifier = Modifier.size(48.dp)
@@ -409,6 +346,48 @@ fun BottomNavigationBar(
     }
 }
 
+@Composable
+fun AnimatedSelectionButton(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    Box(
+        modifier = modifier
+            .scale(scale)
+            .background(
+                color = if (isSelected) Color(0xFFFFA500) else Color.Transparent,
+                shape = RoundedCornerShape(50)
+            )
+            .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) Color.White else Color.Black,
+            modifier = Modifier.clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun AdvertisementAndOfferPreview() {
@@ -416,7 +395,6 @@ fun AdvertisementAndOfferPreview() {
         onHomeClick = { /* No action for preview */ },
         onOffersClick = { /* No action for preview */ },
         onProfileClick = { /* No action for preview */ },
-        onLikesClick = { /* No action for preview */ },
         onLogoutClick = { /* No action for preview */ }
     )
 }

@@ -159,9 +159,6 @@ class MainActivity : ComponentActivity() {
                                 popUpTo("advertisement_and_offer_screen") { inclusive = true }
                             }
                         },
-                        onLikesClick = {
-                            navController.navigate("foodie_favorites_screen")
-                        },
                         onProfileClick = {
                             navController.navigate("foodie_profile_screen")
                         },
