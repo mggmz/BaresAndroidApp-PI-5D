@@ -145,23 +145,7 @@ fun FoodieRestaurantScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Cuadrícula de imágenes
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
 
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier.height(120.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-
-
-                }
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -173,27 +157,7 @@ fun FoodieRestaurantScreen(
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "PROMOCIONES/EVENTOS",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = promotion?.get("offerName") as? String ?: "Sin título",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = promotion?.get("offerDetails") as? String ?: "Sin detalles",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -205,30 +169,8 @@ fun FoodieRestaurantScreen(
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "PROMOCIONES/EVENTOS",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = promotion?.get("offerName") as? String ?: "Sin título",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Text(
-                        text = promotion?.get("offerDetails") as? String ?: "Sin detalles",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // Información adicional
             Column(
