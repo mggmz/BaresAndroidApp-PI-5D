@@ -28,6 +28,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,7 +47,7 @@ fun FoodieProfileScreen(
     val backgroundColor = Color(0xFFFFFFFF)
     val buttonChangePasswordColor = Color(0xFFFFBA8F)
     val buttonRecoverPasswordColor = Color(0xFF0072A3)
-    val buttonLogoutColor = Color(0xFF2C2C2C)
+    val buttonLogoutColor = Color(0xE8EF2D2D)
 
     Scaffold(
         bottomBar = {
@@ -130,19 +131,6 @@ fun FoodieProfileScreen(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-                IconButton(
-                    onClick = onLogoutClick,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(40.dp)
-                        .background(Color(0xFFE5F9FF), shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Logout",
-                        tint = Color.Black
-                    )
-                }
             }
 
             // Imagen de perfil
@@ -197,8 +185,10 @@ fun FoodieProfileScreen(
                 text = "Información",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.Black
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 40.dp),
+                color = Color.Black,
+                textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
