@@ -125,7 +125,7 @@ fun FoodieProfileScreen(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.placeholder_image),
+                    painter = painterResource(id = R.drawable.placeholder_image2),
                     contentDescription = "Foodie Background Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -235,22 +235,7 @@ fun FoodieProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(
-                    onClick = { /* Acción para cambiar contraseña */ },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = buttonChangePasswordColor),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                        .height(57.dp),
-                    contentPadding = PaddingValues(vertical = 12.dp)
-                ) {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = "Cambiar\nContraseña",
-                        color = Color.Black
-                    )
-                }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))

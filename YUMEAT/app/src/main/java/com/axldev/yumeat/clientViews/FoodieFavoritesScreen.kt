@@ -139,14 +139,14 @@ fun FavoritesScreen(
             // Lista de restaurantes favoritos
             Column(modifier = Modifier.fillMaxSize()) {
                 FavoriteRestaurantCard(
-                    imageRes = R.drawable.placeholder_image, // Imagen de prueba
+                    imageRes = R.drawable.placeholder_image2, // Imagen de prueba
                     name = "El Terral By Brisas",
                     distance = "5 min by car",
                     onRemoveFromFavorites = { /* Acción para eliminar */ }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 FavoriteRestaurantCard(
-                    imageRes = R.drawable.user_placeholder, // Imagen de prueba
+                    imageRes = R.drawable.placeholder_image2, // Imagen de prueba
                     name = "Pata Salada",
                     distance = "5 min by car",
                     onRemoveFromFavorites = { /* Acción para eliminar */ }

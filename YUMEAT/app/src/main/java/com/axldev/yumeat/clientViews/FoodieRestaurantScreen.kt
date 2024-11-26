@@ -99,7 +99,7 @@ fun FoodieRestaurantScreen(
                     )
                 } else {
                     Image(
-                        painter = painterResource(id = R.drawable.placeholder_image),
+                        painter = painterResource(id = R.drawable.placeholder_image2),
                         contentDescription = "Restaurant Image",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -152,18 +152,7 @@ fun FoodieRestaurantScreen(
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(120.dp)
-                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
-                ) {
-                    Text(
-                        text = "Grid of Photos",
-                        color = Color.DarkGray,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(
                     modifier = Modifier.height(120.dp),
@@ -182,6 +171,38 @@ fun FoodieRestaurantScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Evento o Promoción del restaurante
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "PROMOCIONES/EVENTOS",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = promotion?.get("offerName") as? String ?: "Sin título",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = promotion?.get("offerDetails") as? String ?: "Sin detalles",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
