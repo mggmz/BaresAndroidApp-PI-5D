@@ -2,222 +2,277 @@ package com.axldev.yumeat.clientViews
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import com.axldev.yumeat.R
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodieMainFeed(
-    onLogoutClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit,
+    onLogoutClick: () -> Unit
+) {
+    val db = FirebaseFirestore.getInstance()
+    var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var searchText by remember { mutableStateOf(TextFieldValue("")) }
+    var listenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
+
+    // Cargar negocios desde Firebase y escuchar cambios en tiempo real
+    LaunchedEffect(Unit) {
+        listenerRegistration = db.collection("business")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    // Manejar el error si es necesario
+                    return@addSnapshotListener
+                }
+                if (snapshots != null) {
+                    businesses = snapshots.documents.mapNotNull { doc ->
+                        val data = doc.data as MutableMap<String, Any>?
+                        data?.also { it["id"] = doc.id }
+                    }
+                }
+            }
+    }
+
+    // Cancelar el listener cuando el Composable es destruido
+    DisposableEffect(Unit) {
+        onDispose {
+            listenerRegistration?.remove()
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopBar(onLogoutClick = onLogoutClick)
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                onHomeClick = onHomeClick,
+                onOffersClick = onOffersClick,
+                onProfileClick = onProfileClick,
+                onLikesClick = onLikesClick
+            )
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Color(0xFFFFFFFF))
+        ) {
+            SearchBar(searchText, onSearchTextChanged = { newValue ->
+                searchText = newValue
+            })
+
+            BusinessGrid(
+                businesses = businesses,
+                searchText = searchText.text
+            )
+        }
+    }
+}
+
+@Composable
+fun TopBar(onLogoutClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Logo YumEat
+        Image(
+            painter = painterResource(id = R.drawable.applogo),
+            contentDescription = "YumEat Logo",
+            modifier = Modifier
+                .size(135.dp)
+                .align(Alignment.TopCenter),
+            contentScale = ContentScale.Fit
+        )
+
+        // Icono de Logout
+        IconButton(
+            onClick = onLogoutClick,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 8.dp)
+        ) {
+            Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
+        }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
     onLikesClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // Logo YumEat
-                Image(
-                    painter = painterResource(id = R.drawable.applogo),
-                    contentDescription = "YumEat Logo",
-                    modifier = Modifier
-                        .size(135.dp)
-                        .align(Alignment.TopCenter),
-                    contentScale = ContentScale.Fit
-                )
-
-                // Icono de Logout
-                IconButton(
-                    onClick = onLogoutClick,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(top = 8.dp)
-                ) {
-                    Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
-                }
-            }
-        },
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(Color(0xFFE0E0E0)),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = onHomeClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
-                    }
-                    IconButton(
-                        onClick = onOffersClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
-                    }
-                    IconButton(
-                        onClick = onLikesClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
-                    }
-                    IconButton(
-                        onClick = onProfileClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
-                    }
-                }
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFFFFFFF))
-        ) {
-            // Search Bar and Filters
-            SearchAndFilterSection()
-
-            // Restaurant Grid
-            RestaurantGrid()
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SearchAndFilterSection() {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    BottomAppBar(
+        backgroundColor = Color(0xFFE0E0E0),
+        cutoutShape = CircleShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .background(
-                    color = Color(0xFFF7EBFF),
-                    shape = RoundedCornerShape(12.dp)
-                ),
+                .padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextField(
-                value = "",
-                onValueChange = {},
-                placeholder = { Text("Buscar un restaurante...") },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
+            IconButton(onClick = onHomeClick) {
+                Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+            }
+            IconButton(onClick = onOffersClick) {
+                Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+            }
+            IconButton(onClick = onLikesClick) {
+                Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
+            }
+            IconButton(onClick = onProfileClick) {
+                Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
+            }
         }
     }
 }
 
-data class Restaurant(
-    val name: String,
-    val type: String,
-    val priceRange: String,
-    val hours: String,
-    val distance: String
-)
+@Composable
+fun SearchBar(searchText: TextFieldValue, onSearchTextChanged: (TextFieldValue) -> Unit) {
+    OutlinedTextField(
+        value = searchText,
+        onValueChange = onSearchTextChanged,
+        label = { Text("Buscar") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        singleLine = true,
+        shape = RoundedCornerShape(32.dp),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color(0xFFFFA500),
+            cursorColor = Color(0xFFFFA500)
+        )
+    )
+}
 
 @Composable
-fun RestaurantGrid() {
-    val restaurants = listOf(
-        Restaurant("El Terral By Brisas", "Gourmet", "$$$", "10 AM - 10 PM", "1.2 km")
-    )
+fun BusinessGrid(businesses: List<Map<String, Any>>, searchText: String) {
+    val filteredBusinesses = businesses.filter { business ->
+        val name = (business["name"] as? String)?.lowercase() ?: ""
+        val foodType = (business["foodType"] as? String)?.lowercase() ?: ""
+        val address = (business["address"] as? String)?.lowercase() ?: ""
+        val searchLower = searchText.lowercase()
+        name.contains(searchLower) || foodType.contains(searchLower) || address.contains(searchLower)
+    }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(8.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(restaurants) { restaurant ->
-            RestaurantCard(restaurant)
+        items(filteredBusinesses) { business ->
+            BusinessCard(business = business)
         }
     }
 }
 
 @Composable
-fun RestaurantCard(restaurant: Restaurant) {
+fun BusinessCard(business: Map<String, Any>) {
+    val name = business["name"] as? String ?: "Nombre no disponible"
+    val foodType = business["foodType"] as? String ?: "Tipo de comida no disponible"
+    val address = business["address"] as? String ?: "Dirección no disponible"
+    val imageUrl = business["imageUrl"] as? String
+
     Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .height(250.dp)
+            .clickable {
+                // Acción al hacer clic en el negocio (por ejemplo, navegar a detalles)
+            },
+        shape = RoundedCornerShape(16.dp),
+        elevation = 4.dp
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFFFFFFF))
-        ) {
-            Image(
-                painter = rememberImagePainter(R.drawable.placeholder_image),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = restaurant.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.Black
+        Column {
+            // Imagen del negocio
+            if (imageUrl != null) {
+                Image(
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = "Imagen del negocio",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    contentScale = ContentScale.Crop
                 )
-                Text(text = restaurant.type, color = Color.Gray, fontSize = 14.sp)
-                Text(text = restaurant.hours, color = Color.Gray, fontSize = 14.sp)
-                Text(text = restaurant.distance, color = Color.Blue, fontSize = 14.sp)
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.food_image),
+                    contentDescription = "Imagen de marcador de posición",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Información del negocio
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                Text(
+                    text = name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = foodType,
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    maxLines = 1
+                )
+                Text(
+                    text = address,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    maxLines = 1
+                )
             }
         }
     }
@@ -227,10 +282,10 @@ fun RestaurantCard(restaurant: Restaurant) {
 @Composable
 fun FoodieMainFeedPreview() {
     FoodieMainFeed(
-        onLogoutClick = {},
         onHomeClick = {},
         onOffersClick = {},
         onProfileClick = {},
-        onLikesClick = {}
+        onLikesClick = {},
+        onLogoutClick = {}
     )
 }
