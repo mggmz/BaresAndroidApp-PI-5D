@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -17,69 +19,61 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.ui.draw.clip
 import com.axldev.yumeat.R
-
+import coil.compose.rememberImagePainter
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun FoodieRestaurantScreen(
+    businessId: String, // ID del restaurante para cargar datos dinámicos
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
     onLikesClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onBackClick: () -> Unit
 ) {
-    Scaffold(
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(Color(0xFFE0E0E0)),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = onHomeClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
-                    }
-                    IconButton(
-                        onClick = onOffersClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
-                    }
-                    IconButton(
-                        onClick = onLikesClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
-                    }
-                    IconButton(
-                        onClick = onProfileClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
-                    }
+    val db = FirebaseFirestore.getInstance()
+    var business by remember { mutableStateOf<Map<String, Any>?>(null) }
+    var promotion by remember { mutableStateOf<Map<String, Any>?>(null) }
+
+    // Cargar información del restaurante y promociones
+    LaunchedEffect(businessId) {
+        val doc = db.collection("business").document(businessId).get().await()
+        business = doc.data
+
+        // Buscar promociones o eventos relacionados
+        val keyword = (business?.get("name") as? String)?.split(" ")?.firstOrNull() ?: ""
+        db.collection("offers")
+            .whereArrayContains("keywords", keyword)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { offersSnapshot ->
+                if (!offersSnapshot.isEmpty) {
+                    promotion = offersSnapshot.documents[0].data
+                } else {
+                    db.collection("events")
+                        .whereArrayContains("keywords", keyword)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener { eventsSnapshot ->
+                            if (!eventsSnapshot.isEmpty) {
+                                promotion = eventsSnapshot.documents[0].data
+                            }
+                        }
                 }
             }
+    }
+
+    Scaffold(
+        bottomBar = {
+            // Barra de navegación inferior específica para esta pantalla
+            RestaurantBottomNavigationBar(
+                onHomeClick = onHomeClick,
+                onOffersClick = onOffersClick,
+                onProfileClick = onProfileClick,
+                onLikesClick = onLikesClick
+            )
         },
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
@@ -95,14 +89,24 @@ fun FoodieRestaurantScreen(
                     .fillMaxWidth()
                     .height(240.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.placeholder_image), // Imagen de fondo (Dummy)
-                    contentDescription = "Restaurant Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                val imageUrl = business?.get("imageUrl") as? String
+                if (imageUrl != null) {
+                    Image(
+                        painter = rememberImagePainter(imageUrl),
+                        contentDescription = "Restaurant Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.placeholder_image),
+                        contentDescription = "Restaurant Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
                 IconButton(
-                    onClick = onLogoutClick,
+                    onClick = onBackClick,
                     modifier = Modifier
                         .padding(16.dp)
                         .size(48.dp)
@@ -126,13 +130,13 @@ fun FoodieRestaurantScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = "Pata Salada Beach Bar",
+                    text = business?.get("name") as? String ?: "Nombre no disponible",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
                 Text(
-                    text = "Avenida Playa de Oro 1509, Manzanillo 28210 México",
+                    text = business?.get("address") as? String ?: "Dirección no disponible",
                     fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 4.dp)
@@ -188,7 +192,6 @@ fun FoodieRestaurantScreen(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "PROMOCIONES/EVENTOS",
                         fontSize = 16.sp,
@@ -196,13 +199,13 @@ fun FoodieRestaurantScreen(
                         color = Color.Black
                     )
                     Text(
-                        text = "Tacos de New York",
+                        text = promotion?.get("offerName") as? String ?: "Sin título",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
                     Text(
-                        text = "Suaves tortillas rellenas de jugoso corte New York...",
+                        text = promotion?.get("offerDetails") as? String ?: "Sin detalles",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
@@ -225,10 +228,47 @@ fun FoodieRestaurantScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Horario: 5 PM - 12 AM",
+                    text = "Horario: ${business?.get("openAt") ?: "N/A"} - ${business?.get("closeAt") ?: "N/A"}",
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun RestaurantBottomNavigationBar(
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color(0xFFE0E0E0)),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onHomeClick) {
+                Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+            }
+            IconButton(onClick = onOffersClick) {
+                Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+            }
+            IconButton(onClick = onLikesClick) {
+                Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
+            }
+            IconButton(onClick = onProfileClick) {
+                Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
             }
         }
     }
@@ -238,10 +278,11 @@ fun FoodieRestaurantScreen(
 @Composable
 fun FoodieRestaurantScreenPreview() {
     FoodieRestaurantScreen(
+        businessId = "sampleBusinessId",
         onHomeClick = {},
         onOffersClick = {},
         onProfileClick = {},
         onLikesClick = {},
-        onLogoutClick = {}
+        onBackClick = {}
     )
 }

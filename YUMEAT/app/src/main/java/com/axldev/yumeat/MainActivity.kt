@@ -16,6 +16,7 @@ import com.axldev.yumeat.clientViews.AdvertisementAndOfferScreen
 import com.axldev.yumeat.clientViews.FavoritesScreen
 import com.axldev.yumeat.clientViews.FoodieMainFeed
 import com.axldev.yumeat.clientViews.FoodieProfileScreen
+import com.axldev.yumeat.clientViews.FoodieRestaurantScreen
 import com.axldev.yumeat.rootViews.ActiveAlertsOffersScreen
 import com.axldev.yumeat.rootViews.RegisteredUsersScreen
 import com.axldev.yumeat.viewmodel.AuthViewModel
@@ -119,9 +120,30 @@ class MainActivity : ComponentActivity() {
                         onLikesClick = {
                             navController.navigate("foodie_favorites_screen")
                         },
+                        onRestaurantClick = {businessId ->
+                            navController.navigate("foodie_restaurant_screen/$businessId")},
                         onProfileClick = {
                             navController.navigate("foodie_profile_screen")
                         }
+                    )
+                }
+
+                //Foodie Restaurant Screen
+
+                composable(
+                    route = "foodie_restaurant_screen/{businessId}",
+                    arguments = listOf(navArgument("businessId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val businessId = backStackEntry.arguments?.getString("businessId") ?: ""
+                    FoodieRestaurantScreen(
+                        businessId = businessId,
+                        onHomeClick = { navController.navigate("foodie_main") },
+                        onOffersClick = {navController.navigate("advertisement_and_offer_screen") {
+                            popUpTo("advertisement_and_offer_screen") { inclusive = true }
+                        } },
+                        onProfileClick = { navController.navigate("foodie_profile_screen") },
+                        onLikesClick = { navController.navigate("foodie_favorites_screen") },
+                        onBackClick = { navController.popBackStack() }
                     )
                 }
 

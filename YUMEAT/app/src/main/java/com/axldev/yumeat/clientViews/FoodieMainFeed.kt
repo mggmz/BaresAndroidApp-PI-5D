@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -41,7 +40,8 @@ fun FoodieMainFeed(
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
     onLikesClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onRestaurantClick: (String) -> Unit
 ) {
     val db = FirebaseFirestore.getInstance()
     var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
@@ -53,7 +53,6 @@ fun FoodieMainFeed(
         listenerRegistration = db.collection("business")
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
-                    // Manejar el error si es necesario
                     return@addSnapshotListener
                 }
                 if (snapshots != null) {
@@ -65,7 +64,6 @@ fun FoodieMainFeed(
             }
     }
 
-    // Cancelar el listener cuando el Composable es destruido
     DisposableEffect(Unit) {
         onDispose {
             listenerRegistration?.remove()
@@ -77,7 +75,7 @@ fun FoodieMainFeed(
             TopBar(onLogoutClick = onLogoutClick)
         },
         bottomBar = {
-            BottomNavigationBar(
+            MainFeedBottomNavigationBar(
                 onHomeClick = onHomeClick,
                 onOffersClick = onOffersClick,
                 onProfileClick = onProfileClick,
@@ -98,7 +96,8 @@ fun FoodieMainFeed(
 
             BusinessGrid(
                 businesses = businesses,
-                searchText = searchText.text
+                searchText = searchText.text,
+                onRestaurantClick = onRestaurantClick
             )
         }
     }
@@ -112,7 +111,6 @@ fun TopBar(onLogoutClick: () -> Unit) {
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Logo YumEat
         Image(
             painter = painterResource(id = R.drawable.applogo),
             contentDescription = "YumEat Logo",
@@ -122,7 +120,6 @@ fun TopBar(onLogoutClick: () -> Unit) {
             contentScale = ContentScale.Fit
         )
 
-        // Icono de Logout
         IconButton(
             onClick = onLogoutClick,
             modifier = Modifier
@@ -135,7 +132,7 @@ fun TopBar(onLogoutClick: () -> Unit) {
 }
 
 @Composable
-fun BottomNavigationBar(
+fun MainFeedBottomNavigationBar(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
@@ -176,7 +173,7 @@ fun SearchBar(searchText: TextFieldValue, onSearchTextChanged: (TextFieldValue) 
     OutlinedTextField(
         value = searchText,
         onValueChange = onSearchTextChanged,
-        label = { Text("Buscar") },
+        placeholder = { Text("Buscar") },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
@@ -190,7 +187,11 @@ fun SearchBar(searchText: TextFieldValue, onSearchTextChanged: (TextFieldValue) 
 }
 
 @Composable
-fun BusinessGrid(businesses: List<Map<String, Any>>, searchText: String) {
+fun BusinessGrid(
+    businesses: List<Map<String, Any>>,
+    searchText: String,
+    onRestaurantClick: (String) -> Unit
+) {
     val filteredBusinesses = businesses.filter { business ->
         val name = (business["name"] as? String)?.lowercase() ?: ""
         val foodType = (business["foodType"] as? String)?.lowercase() ?: ""
@@ -205,13 +206,21 @@ fun BusinessGrid(businesses: List<Map<String, Any>>, searchText: String) {
         modifier = Modifier.fillMaxSize()
     ) {
         items(filteredBusinesses) { business ->
-            BusinessCard(business = business)
+            BusinessCard(business = business, onClick = {
+                val businessId = business["id"] as? String
+                if (businessId != null) {
+                    onRestaurantClick(businessId)
+                }
+            })
         }
     }
 }
 
 @Composable
-fun BusinessCard(business: Map<String, Any>) {
+fun BusinessCard(
+    business: Map<String, Any>,
+    onClick: () -> Unit
+) {
     val name = business["name"] as? String ?: "Nombre no disponible"
     val foodType = business["foodType"] as? String ?: "Tipo de comida no disponible"
     val address = business["address"] as? String ?: "Dirección no disponible"
@@ -222,14 +231,11 @@ fun BusinessCard(business: Map<String, Any>) {
             .padding(8.dp)
             .fillMaxWidth()
             .height(250.dp)
-            .clickable {
-                // Acción al hacer clic en el negocio (por ejemplo, navegar a detalles)
-            },
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = 4.dp
     ) {
         Column {
-            // Imagen del negocio
             if (imageUrl != null) {
                 Image(
                     painter = rememberImagePainter(data = imageUrl),
@@ -252,7 +258,6 @@ fun BusinessCard(business: Map<String, Any>) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Información del negocio
             Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                 Text(
                     text = name,
@@ -286,6 +291,7 @@ fun FoodieMainFeedPreview() {
         onOffersClick = {},
         onProfileClick = {},
         onLikesClick = {},
-        onLogoutClick = {}
+        onLogoutClick = {},
+        onRestaurantClick = {}
     )
 }
