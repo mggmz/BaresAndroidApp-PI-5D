@@ -158,13 +158,8 @@ fun FoodieRestaurantScreen(
                     modifier = Modifier.height(120.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = { /* Añadir a favoritos */ }) {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "Add to Favorites",
-                            tint = Color.Black
-                        )
-                    }
+
+
                 }
             }
 
@@ -285,9 +280,7 @@ fun RestaurantBottomNavigationBar(
             IconButton(onClick = onOffersClick) {
                 Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
             }
-            IconButton(onClick = onLikesClick) {
-                Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
-            }
+
             IconButton(onClick = onProfileClick) {
                 Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
             }

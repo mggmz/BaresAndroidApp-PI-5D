@@ -13,7 +13,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.axldev.yumeat.clientViews.AdvertisementAndOfferScreen
-import com.axldev.yumeat.clientViews.FavoritesScreen
 import com.axldev.yumeat.clientViews.FoodieMainFeed
 import com.axldev.yumeat.clientViews.FoodieProfileScreen
 import com.axldev.yumeat.clientViews.FoodieRestaurantScreen
@@ -175,33 +174,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Foodie Favorites Screen
-                composable("foodie_favorites_screen") {
-                    FavoritesScreen(
-                        onHomeClick = {
-                            navController.navigate("foodie_main") {
-                                popUpTo("foodie_main") { inclusive = true }
-                            }
-                        },
-                        onOffersClick = {
-                            navController.navigate("advertisement_and_offer_screen")
-                        },
-                        onLikesClick = {
-                            navController.navigate("foodie_favorites_screen") {
-                                popUpTo("foodie_favorites_screen") { inclusive = true }
-                            }
-                        },
-                        onProfileClick = {
-                            navController.navigate("foodie_profile_screen")
-                        },
-                        onLogoutClick = {
-                            authViewModel.logOut()
-                            navController.navigate("login") {
-                                popUpTo("foodie_favorites_screen") { inclusive = true }
-                            }
-                        }
-                    )
-                }
 
                 // Foodie Profile Screen
                 composable("foodie_profile_screen") {

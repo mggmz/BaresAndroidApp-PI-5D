@@ -394,16 +394,7 @@ fun BottomNavigationBar(
                     tint = Color.Gray
                 )
             }
-            IconButton(
-                onClick = onLikesClick,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Favorite,
-                    contentDescription = "Likes",
-                    tint = Color.Gray
-                )
-            }
+
             IconButton(
                 onClick = onProfileClick,
                 modifier = Modifier.size(48.dp)
