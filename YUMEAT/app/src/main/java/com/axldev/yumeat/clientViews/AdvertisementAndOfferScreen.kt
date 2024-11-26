@@ -1,84 +1,35 @@
 package com.axldev.yumeat.clientViews
 
-import android.os.Bundle
-import android.view.WindowManager
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.content.MediaType.Companion.Image
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.*
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.compose.ui.unit.*
+import coil.compose.rememberImagePainter
 import com.axldev.yumeat.R
-
-data class Advertisement(
-    val id: Int,
-    val title: String,
-    val description: String
-)
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Ocultar completamente las barras del sistema
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
-
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-
-        ViewCompat.getWindowInsetsController(window.decorView)?.apply {
-            hide(WindowInsetsCompat.Type.systemBars())
-            hide(WindowInsetsCompat.Type.navigationBars())
-            hide(WindowInsetsCompat.Type.statusBars())
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        }
-
-        setContent {
-            AdvertisementAndOfferScreen(
-                onHomeClick = { /* No action for preview */ },
-                onOffersClick = { /* No action for preview */ },
-                onProfileClick = { /* No action for preview */ },
-                onLikesClick = { /* No action for preview */ },
-                onLogoutClick = { /* No action for preview */ }
-            )
-        }
-    }
-}
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.tasks.await
+import android.util.Log
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun AnimatedSelectionButton(
@@ -131,8 +82,56 @@ fun AdvertisementAndOfferScreen(
     onLogoutClick: () -> Unit
 ) {
     var currentView by remember { mutableStateOf("Advertisement") }
-    var advertisements by remember { mutableStateOf(listOf<Advertisement>()) }
-    var offers by remember { mutableStateOf(listOf<Advertisement>()) }
+    var advertisements by remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var offers by remember { mutableStateOf(listOf<Map<String, Any>>()) }
+
+    val db = FirebaseFirestore.getInstance()
+    var adsListenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
+    var offersListenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
+
+    // Load advertisements (events) from Firebase
+    LaunchedEffect(Unit) {
+        adsListenerRegistration = db.collection("events")
+            .whereEqualTo("active", true)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("AdvertisementScreen", "Error fetching events: ${e.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshots != null) {
+                    advertisements = snapshots.documents.mapNotNull { doc ->
+                        val data = doc.data
+                        data?.also { it["id"] = doc.id }
+                    }
+                }
+            }
+    }
+
+    // Load offers from Firebase
+    LaunchedEffect(Unit) {
+        offersListenerRegistration = db.collection("offers")
+            .whereEqualTo("active", true)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("AdvertisementScreen", "Error fetching offers: ${e.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshots != null) {
+                    offers = snapshots.documents.mapNotNull { doc ->
+                        val data = doc.data
+                        data?.also { it["id"] = doc.id }
+                    }
+                }
+            }
+    }
+
+    // Cancel the listeners when the Composable is destroyed
+    DisposableEffect(Unit) {
+        onDispose {
+            adsListenerRegistration?.remove()
+            offersListenerRegistration?.remove()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -164,62 +163,12 @@ fun AdvertisementAndOfferScreen(
             )
         },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(Color(0xFFE0E0E0)),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = onHomeClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Home,
-                            contentDescription = "Home",
-                            tint = Color.Gray
-                        )
-                    }
-                    IconButton(
-                        onClick = onOffersClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.LocalOffer,
-                            contentDescription = "Offers",
-                            tint = Color.Gray
-                        )
-                    }
-                    IconButton(
-                        onClick = onLikesClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Likes",
-                            tint = Color.Gray
-                        )
-                    }
-                    IconButton(
-                        onClick = onProfileClick,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Person,
-                            contentDescription = "Profile",
-                            tint = Color.Gray
-                        )
-                    }
-                }
-            }
+            BottomNavigationBar(
+                onHomeClick = onHomeClick,
+                onOffersClick = onOffersClick,
+                onProfileClick = onProfileClick,
+                onLikesClick = onLikesClick
+            )
         }
     ) { paddingValues ->
         Box(
@@ -278,8 +227,7 @@ fun AdvertisementAndOfferScreen(
                             )
                         } else {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(advertisements.size) { index ->
-                                    val ad = advertisements[index]
+                                items(advertisements) { ad ->
                                     AdvertisementItem(advertisement = ad)
                                 }
                             }
@@ -295,8 +243,7 @@ fun AdvertisementAndOfferScreen(
                             )
                         } else {
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(offers.size) { index ->
-                                    val offer = offers[index]
+                                items(offers) { offer ->
                                     OfferItem(offer = offer)
                                 }
                             }
@@ -309,7 +256,12 @@ fun AdvertisementAndOfferScreen(
 }
 
 @Composable
-fun AdvertisementItem(advertisement: Advertisement) {
+fun AdvertisementItem(advertisement: Map<String, Any>) {
+    val title = advertisement["eventName"] as? String ?: "No Title"
+    val description = advertisement["eventDescription"] as? String ?: "No Description"
+    val imageUrl = advertisement["imageUrl"] as? String
+    val businessName = advertisement["businessName"] as? String ?: "Unknown Business"
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -317,31 +269,48 @@ fun AdvertisementItem(advertisement: Advertisement) {
         elevation = 4.dp,
         shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = advertisement.title,
-                    style = MaterialTheme.typography.h6,
-                    fontWeight = FontWeight.Bold
+            // Display image if available
+            if (imageUrl != null) {
+                Image(
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = "Event Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = advertisement.description,
-                    style = MaterialTheme.typography.body2,
-                    color = Color.Gray
-                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Business: $businessName",
+                style = MaterialTheme.typography.subtitle2,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.body2,
+                color = Color.Gray
+            )
         }
     }
 }
 
 @Composable
-fun OfferItem(offer: Advertisement) {
+fun OfferItem(offer: Map<String, Any>) {
+    val title = offer["offerName"] as? String ?: "No Title"
+    val description = offer["offerDetails"] as? String ?: "No Description"
+    val imageUrl = offer["imageUrl"] as? String
+    val businessName = offer["businessName"] as? String ?: "Unknown Business"
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -349,23 +318,100 @@ fun OfferItem(offer: Advertisement) {
         elevation = 4.dp,
         shape = RoundedCornerShape(12.dp)
     ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Display image if available
+            if (imageUrl != null) {
+                Image(
+                    painter = rememberImagePainter(data = imageUrl),
+                    contentDescription = "Offer Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.h6,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Business: $businessName",
+                style = MaterialTheme.typography.subtitle2,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.body2,
+                color = Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(
+    onHomeClick: () -> Unit,
+    onOffersClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .height(56.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color(0xFFE0E0E0)),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = offer.title,
-                    style = MaterialTheme.typography.h6,
-                    fontWeight = FontWeight.Bold
+            IconButton(
+                onClick = onHomeClick,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Home,
+                    contentDescription = "Home",
+                    tint = Color.Gray
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = offer.description,
-                    style = MaterialTheme.typography.body2,
-                    color = Color.Gray
+            }
+            IconButton(
+                onClick = onOffersClick,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    Icons.Filled.LocalOffer,
+                    contentDescription = "Offers",
+                    tint = Color.Gray
+                )
+            }
+            IconButton(
+                onClick = onLikesClick,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Favorite,
+                    contentDescription = "Likes",
+                    tint = Color.Gray
+                )
+            }
+            IconButton(
+                onClick = onProfileClick,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Person,
+                    contentDescription = "Profile",
+                    tint = Color.Gray
                 )
             }
         }
