@@ -7,9 +7,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,40 +22,102 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import com.axldev.yumeat.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodieMainFeed(
+    onLogoutClick: () -> Unit,
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit
 ) {
-    // Estructura principal con Scaffold
     Scaffold(
-        bottomBar = { BottomNavigationBar(
-            onHomeClick = onHomeClick,
-            onOffersClick = onOffersClick,
-            onProfileClick = onProfileClick
-        ) }, // Acopla el BottomBar
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Logo YumEat
+                Image(
+                    painter = painterResource(id = R.drawable.applogo),
+                    contentDescription = "YumEat Logo",
+                    modifier = Modifier
+                        .size(135.dp)
+                        .align(Alignment.TopCenter),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Icono de Logout
+                IconButton(
+                    onClick = onLogoutClick,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(top = 8.dp)
+                ) {
+                    Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
+                }
+            }
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onOffersClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onLikesClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
+                    }
+                }
+            }
+        },
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFFFFFFF)) // Fondo blanco
+                .background(Color(0xFFFFFFFF))
         ) {
-            // Header
-            HeaderSection()
-
-            // Search Bar & Filters
+            // Search Bar and Filters
             SearchAndFilterSection()
 
             // Restaurant Grid
@@ -61,43 +126,16 @@ fun FoodieMainFeed(
     }
 }
 
-@Composable
-fun HeaderSection() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.applogo),
-            contentDescription = "YumEat Logo",
-            modifier = Modifier
-                .size(135.dp),
-            contentScale = ContentScale.Fit
-        )
-        Text(
-            text = "Get some food!!",
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier
-                .padding(top = 126.dp)
-
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchAndFilterSection() {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        // Search Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
                 .background(
-                    color = Color(0xFFF7EBFF), // SearchBar
+                    color = Color(0xFFF7EBFF),
                     shape = RoundedCornerShape(12.dp)
                 ),
             verticalAlignment = Alignment.CenterVertically
@@ -127,9 +165,8 @@ data class Restaurant(
 
 @Composable
 fun RestaurantGrid() {
-    // Mock Data
     val restaurants = listOf(
-        Restaurant("El Terral By Brisas", "Gourmet", "$$$", "10 AM - 10 PM", "1.2 km"),
+        Restaurant("El Terral By Brisas", "Gourmet", "$$$", "10 AM - 10 PM", "1.2 km")
     )
 
     LazyVerticalGrid(
@@ -158,7 +195,7 @@ fun RestaurantCard(restaurant: Restaurant) {
                 .background(Color(0xFFFFFFFF))
         ) {
             Image(
-                painter = painterResource(id = R.drawable.placeholder_image), //Prop
+                painter = rememberImagePainter(R.drawable.placeholder_image),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -190,8 +227,10 @@ fun RestaurantCard(restaurant: Restaurant) {
 @Composable
 fun FoodieMainFeedPreview() {
     FoodieMainFeed(
+        onLogoutClick = {},
         onHomeClick = {},
         onOffersClick = {},
-        onProfileClick = {}
+        onProfileClick = {},
+        onLikesClick = {}
     )
 }

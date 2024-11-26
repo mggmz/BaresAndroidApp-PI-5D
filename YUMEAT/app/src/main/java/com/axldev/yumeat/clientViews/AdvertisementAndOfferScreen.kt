@@ -5,8 +5,10 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.content.MediaType.Companion.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -23,12 +25,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.axldev.yumeat.R
 
 data class Advertisement(
     val id: Int,
@@ -61,7 +72,9 @@ class MainActivity : ComponentActivity() {
             AdvertisementAndOfferScreen(
                 onHomeClick = { /* No action for preview */ },
                 onOffersClick = { /* No action for preview */ },
-                onProfileClick = { /* No action for preview */ }
+                onProfileClick = { /* No action for preview */ },
+                onLikesClick = { /* No action for preview */ },
+                onLogoutClick = { /* No action for preview */ }
             )
         }
     }
@@ -113,19 +126,100 @@ fun AnimatedSelectionButton(
 fun AdvertisementAndOfferScreen(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     var currentView by remember { mutableStateOf("Advertisement") }
     var advertisements by remember { mutableStateOf(listOf<Advertisement>()) }
     var offers by remember { mutableStateOf(listOf<Advertisement>()) }
 
     Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                onHomeClick = onHomeClick,
-                onOffersClick = onOffersClick,
-                onProfileClick = onProfileClick
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = onLogoutClick) {
+                            Icon(
+                                imageVector = Icons.Default.ExitToApp,
+                                contentDescription = "Logout",
+                                tint = Color.Gray
+                            )
+                        }
+                        Image(
+                            painter = painterResource(id = R.drawable.applogo),
+                            contentDescription = "YumEat Logo",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
+                },
+                backgroundColor = Color.White,
+                elevation = 4.dp
             )
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Home",
+                            tint = Color.Gray
+                        )
+                    }
+                    IconButton(
+                        onClick = onOffersClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.LocalOffer,
+                            contentDescription = "Offers",
+                            tint = Color.Gray
+                        )
+                    }
+                    IconButton(
+                        onClick = onLikesClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Likes",
+                            tint = Color.Gray
+                        )
+                    }
+                    IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = "Profile",
+                            tint = Color.Gray
+                        )
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -138,8 +232,6 @@ fun AdvertisementAndOfferScreen(
                     .fillMaxSize()
                     .padding(16.dp),
             ) {
-                HeaderSection()
-
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -286,6 +378,8 @@ fun AdvertisementAndOfferPreview() {
     AdvertisementAndOfferScreen(
         onHomeClick = { /* No action for preview */ },
         onOffersClick = { /* No action for preview */ },
-        onProfileClick = { /* No action for preview */ }
+        onProfileClick = { /* No action for preview */ },
+        onLikesClick = { /* No action for preview */ },
+        onLogoutClick = { /* No action for preview */ }
     )
 }

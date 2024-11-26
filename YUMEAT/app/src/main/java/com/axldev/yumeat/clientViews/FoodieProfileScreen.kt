@@ -25,6 +25,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.axldev.yumeat.R
@@ -35,6 +39,8 @@ fun FoodieProfileScreen(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit,
+    onLogoutClick: () -> Unit,
     onEditInfoClick: () -> Unit
 ) {
     val backgroundColor = Color(0xFFFFFFFF)
@@ -44,11 +50,62 @@ fun FoodieProfileScreen(
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(
-                onHomeClick = onHomeClick,
-                onOffersClick = onOffersClick,
-                onProfileClick = onProfileClick
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    androidx.compose.material3.IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Home",
+                            tint = Color.Gray
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = onOffersClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.LocalOffer,
+                            contentDescription = "Offers",
+                            tint = Color.Gray
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = onLikesClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.Favorite,
+                            contentDescription = "Likes",
+                            tint = Color.Gray
+                        )
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.Person,
+                            contentDescription = "Profile",
+                            tint = Color.Gray
+                        )
+                    }
+                }
+            }
         },
         modifier = Modifier.fillMaxSize(),
         backgroundColor = backgroundColor
@@ -59,7 +116,7 @@ fun FoodieProfileScreen(
                 .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            //Imagen de fondo
+            // Imagen de fondo
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,30 +125,27 @@ fun FoodieProfileScreen(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.placeholder_image), //Imagen Dummy
+                    painter = painterResource(id = R.drawable.placeholder_image),
                     contentDescription = "Foodie Background Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
                 IconButton(
-                    onClick = { /* Acción para editar fondo */ },
+                    onClick = onLogoutClick,
                     modifier = Modifier
-                        .size(40.dp)
                         .padding(8.dp)
-                        .background(
-                            color = Color(0xFFE5F9FF),
-                            shape = CircleShape
-                        )
+                        .size(40.dp)
+                        .background(Color(0xFFE5F9FF), shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar fondo",
+                        contentDescription = "Logout",
                         tint = Color.Black
                     )
                 }
             }
 
-            //Imagen de perfil
+            // Imagen de perfil
             Box(
                 modifier = Modifier
                     .offset(y = (-50).dp)
@@ -99,7 +153,7 @@ fun FoodieProfileScreen(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.user_placeholder2), //Reemplaza con la imagen real
+                    painter = painterResource(id = R.drawable.user_placeholder2),
                     contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(140.dp)
@@ -123,7 +177,7 @@ fun FoodieProfileScreen(
                 }
             }
 
-            //Nombre y descripción
+            // Nombre y descripción
             Text(
                 text = "Username",
                 fontWeight = FontWeight.Bold,
@@ -138,7 +192,7 @@ fun FoodieProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            //Sección de información
+            // Sección de información
             Text(
                 text = "Información",
                 fontWeight = FontWeight.Bold,
@@ -158,7 +212,7 @@ fun FoodieProfileScreen(
                 color = Color.Gray
             )
 
-            //Botón para editar información
+            // Botón para editar información
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = onEditInfoClick,
@@ -176,7 +230,7 @@ fun FoodieProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            //Botones de acción (Contraseña)
+            // Botones de acción (Contraseña)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -189,7 +243,7 @@ fun FoodieProfileScreen(
                         .weight(1f)
                         .padding(end = 8.dp)
                         .height(57.dp),
-                    contentPadding = PaddingValues(vertical = 12.dp) //Centrar texto verticalmente
+                    contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
                     Text(
                         textAlign = TextAlign.Center,
@@ -201,9 +255,9 @@ fun FoodieProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            //Botón de cerrar sesión
+            // Botón de cerrar sesión
             Button(
-                onClick = { /* Acción para cerrar sesión */ },
+                onClick = onLogoutClick,
                 colors = ButtonDefaults.buttonColors(backgroundColor = buttonLogoutColor),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
@@ -226,7 +280,8 @@ fun FoodieProfileScreenPreview() {
         onHomeClick = {},
         onOffersClick = {},
         onProfileClick = {},
+        onLikesClick = {}, // Agregado para el preview
+        onLogoutClick = {}, // Agregado para el preview
         onEditInfoClick = {}
     )
 }
-

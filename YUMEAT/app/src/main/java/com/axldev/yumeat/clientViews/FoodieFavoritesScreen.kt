@@ -16,8 +16,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -27,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -41,15 +48,85 @@ import com.axldev.yumeat.quicksandFont
 fun FavoritesScreen(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Scaffold(
-        bottomBar = { BottomNavigationBar(
-            onHomeClick = onHomeClick,
-            onOffersClick = onOffersClick,
-            onProfileClick = onProfileClick
-        ) },
-        modifier = Modifier.fillMaxSize()
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = onLogoutClick,
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ExitToApp,
+                                contentDescription = "Logout",
+                                tint = Color.Gray
+                            )
+                        }
+                        Text(
+                            text = "Favorites",
+                            fontFamily = quicksandFont,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onOffersClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onLikesClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
+                    }
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -57,34 +134,19 @@ fun FavoritesScreen(
                 .background(Color(0xFFFFFFFF))
                 .padding(paddingValues)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Favoritos",
-                    fontFamily = quicksandFont,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            //Lista de restaurantes favoritos
+            // Lista de restaurantes favoritos
             Column(modifier = Modifier.fillMaxSize()) {
                 FavoriteRestaurantCard(
-                    imageRes = R.drawable.placeholder_image, //Imagen de prueba
+                    imageRes = R.drawable.placeholder_image, // Imagen de prueba
                     name = "El Terral By Brisas",
                     distance = "5 min by car",
                     onRemoveFromFavorites = { /* Acción para eliminar */ }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 FavoriteRestaurantCard(
-                    imageRes = R.drawable.user_placeholder, //Imagen de prueba
+                    imageRes = R.drawable.user_placeholder, // Imagen de prueba
                     name = "Pata Salada",
                     distance = "5 min by car",
                     onRemoveFromFavorites = { /* Acción para eliminar */ }
@@ -176,6 +238,9 @@ fun FavoritesScreenPreview() {
     FavoritesScreen(
         onHomeClick = {},
         onOffersClick = {},
-        onProfileClick = {}
+        onProfileClick = {},
+        onLikesClick = {},
+        onLogoutClick = {}
     )
 }
+

@@ -12,7 +12,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.axldev.yumeat.clientViews.UserMainScreenContent
+import com.axldev.yumeat.clientViews.AdvertisementAndOfferScreen
+import com.axldev.yumeat.clientViews.FavoritesScreen
+import com.axldev.yumeat.clientViews.FoodieMainFeed
+import com.axldev.yumeat.clientViews.FoodieProfileScreen
 import com.axldev.yumeat.rootViews.ActiveAlertsOffersScreen
 import com.axldev.yumeat.rootViews.RegisteredUsersScreen
 import com.axldev.yumeat.viewmodel.AuthViewModel
@@ -68,30 +71,23 @@ class MainActivity : ComponentActivity() {
                                 when (userType) {
                                     "root" -> {
                                         navController.navigate("root_main") {
-                                            popUpTo("login") {
-                                                inclusive = true
-                                            }
+                                            popUpTo("login") { inclusive = true }
                                         }
                                     }
 
                                     "vendedor" -> {
                                         navController.navigate("owner_main") {
-                                            popUpTo("login") {
-                                                inclusive = true
-                                            }
+                                            popUpTo("login") { inclusive = true }
                                         }
                                     }
 
                                     "cliente" -> {
-                                        navController.navigate("client_main") {
-                                            popUpTo("login") {
-                                                inclusive = true
-                                            }
+                                        navController.navigate("foodie_main") {
+                                            popUpTo("login") { inclusive = true }
                                         }
                                     }
 
                                     else -> {
-                                        // Manejo de error si el userType es null o no válido
                                         Log.d("MainActivity", "User type not found or invalid")
                                     }
                                 }
@@ -99,6 +95,119 @@ class MainActivity : ComponentActivity() {
                         },
                         onRegisterClick = {
                             navController.navigate("register")
+                        }
+                    )
+                }
+
+                // Foodie Main
+                composable("foodie_main") {
+                    FoodieMainFeed(
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen")
+                        },
+                        onLikesClick = {
+                            navController.navigate("foodie_favorites_screen")
+                        },
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen")
+                        }
+                    )
+                }
+
+                // Advertisement and Offers Screen
+                composable("advertisement_and_offer_screen") {
+                    AdvertisementAndOfferScreen(
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen") {
+                                popUpTo("advertisement_and_offer_screen") { inclusive = true }
+                            }
+                        },
+                        onLikesClick = {
+                            navController.navigate("foodie_favorites_screen")
+                        },
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen")
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("advertisement_and_offer_screen") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Foodie Favorites Screen
+                composable("foodie_favorites_screen") {
+                    FavoritesScreen(
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen")
+                        },
+                        onLikesClick = {
+                            navController.navigate("foodie_favorites_screen") {
+                                popUpTo("foodie_favorites_screen") { inclusive = true }
+                            }
+                        },
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen")
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("foodie_favorites_screen") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Foodie Profile Screen
+                composable("foodie_profile_screen") {
+                    FoodieProfileScreen(
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen")
+                        },
+                        onLikesClick = {
+                            navController.navigate("foodie_favorites_screen")
+                        },
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen") {
+                                popUpTo("foodie_profile_screen") { inclusive = true }
+                            }
+                        },
+                        onEditInfoClick = {
+                            // Lógica para editar información
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("foodie_profile_screen") { inclusive = true }
+                            }
                         }
                     )
                 }
@@ -122,23 +231,6 @@ class MainActivity : ComponentActivity() {
                         },
                         onProfileClick = {
                             navController.navigate("registered_users")
-                        }
-                    )
-                }
-
-                // Pantalla principal para Cliente
-                composable("client_main") {
-                    UserMainScreenContent(
-                        onHomeClick = {
-                            navController.navigate("client_main") {
-                                popUpTo("client_main") { inclusive = true }
-                            }
-                        },
-                        onOffersClick = {
-                            navController.navigate("client_offers")
-                        },
-                        onProfileClick = {
-                            navController.navigate("user_profile")
                         }
                     )
                 }

@@ -20,8 +20,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.draw.clip
 import com.axldev.yumeat.R
 
@@ -30,14 +34,53 @@ import com.axldev.yumeat.R
 fun FoodieRestaurantScreen(
     onHomeClick: () -> Unit,
     onOffersClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onLikesClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Scaffold(
-        bottomBar = { BottomNavigationBar(
-            onHomeClick = onHomeClick,
-            onOffersClick = onOffersClick,
-            onProfileClick = onProfileClick
-        ) }, // BottomBar reutilizado
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onOffersClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onLikesClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Favorite, contentDescription = "Likes", tint = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = onProfileClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Person, contentDescription = "Profile", tint = Color.Gray)
+                    }
+                }
+            }
+        },
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Column(
@@ -59,7 +102,7 @@ fun FoodieRestaurantScreen(
                     modifier = Modifier.fillMaxSize()
                 )
                 IconButton(
-                    onClick = { /* TODO: Acción para regresar */ },
+                    onClick = onLogoutClick,
                     modifier = Modifier
                         .padding(16.dp)
                         .size(48.dp)
@@ -111,7 +154,6 @@ fun FoodieRestaurantScreen(
                         .height(120.dp)
                         .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
                 ) {
-                    // Aquí colocarás las imágenes dinámicas
                     Text(
                         text = "Grid of Photos",
                         color = Color.DarkGray,
@@ -146,10 +188,9 @@ fun FoodieRestaurantScreen(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "PROMCIONES/EVENTOS",
+                        text = "PROMOCIONES/EVENTOS",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
@@ -165,15 +206,6 @@ fun FoodieRestaurantScreen(
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                    }
                 }
             }
 
@@ -192,19 +224,11 @@ fun FoodieRestaurantScreen(
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Horario: 5 PM - 12 AM",
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                }
+                Text(
+                    text = "Horario: 5 PM - 12 AM",
+                    fontSize = 16.sp,
+                    color = Color.Gray
+                )
             }
         }
     }
@@ -216,6 +240,8 @@ fun FoodieRestaurantScreenPreview() {
     FoodieRestaurantScreen(
         onHomeClick = {},
         onOffersClick = {},
-        onProfileClick = {}
+        onProfileClick = {},
+        onLikesClick = {},
+        onLogoutClick = {}
     )
 }
