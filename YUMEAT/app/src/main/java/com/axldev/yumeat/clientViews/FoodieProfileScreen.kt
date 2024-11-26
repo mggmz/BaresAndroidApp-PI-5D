@@ -8,27 +8,24 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.Image
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.*
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.rememberImagePainter
 import com.axldev.yumeat.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -38,12 +35,49 @@ fun FoodieProfileScreen(
     onProfileClick: () -> Unit,
     onLikesClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onEditInfoClick: () -> Unit
+    onEditInfoClick: () -> Unit // This functionality is omitted as per instructions
 ) {
     val backgroundColor = Color(0xFFFFFFFF)
-    val buttonChangePasswordColor = Color(0xFFFFBA8F)
-    val buttonRecoverPasswordColor = Color(0xFF0072A3)
     val buttonLogoutColor = Color(0xE8EF2D2D)
+
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+    val currentUser = auth.currentUser
+    var username by remember { mutableStateOf("Username") }
+    var email by remember { mutableStateOf("Email") }
+    var profileImageUrl by remember { mutableStateOf<String?>(null) }
+    var listenerRegistration by remember { mutableStateOf<ListenerRegistration?>(null) }
+
+    // Fetch user information from Firestore
+    LaunchedEffect(currentUser?.uid) {
+        if (currentUser != null) {
+            listenerRegistration = db.collection("users")
+                .document(currentUser.uid)
+                .addSnapshotListener { snapshot, e ->
+                    if (e != null) {
+                        // Handle the error if necessary
+                        return@addSnapshotListener
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        val data = snapshot.data
+                        username = data?.get("username") as? String ?: "Username"
+                        email = data?.get("email") as? String ?: "Email"
+                        profileImageUrl = data?.get("profileImageUrl") as? String
+                    } else {
+                        // If the user document doesn't exist, use default values
+                        username = currentUser.displayName ?: "Username"
+                        email = currentUser.email ?: "Email"
+                    }
+                }
+        }
+    }
+
+    // Remove listener when composable is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            listenerRegistration?.remove()
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -61,41 +95,41 @@ fun FoodieProfileScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    androidx.compose.material3.IconButton(
+                    IconButton(
                         onClick = onHomeClick,
                         modifier = Modifier.size(48.dp)
                     ) {
-                        androidx.compose.material3.Icon(
+                        Icon(
                             Icons.Filled.Home,
                             contentDescription = "Home",
                             tint = Color.Gray
                         )
                     }
-                    androidx.compose.material3.IconButton(
+                    IconButton(
                         onClick = onOffersClick,
                         modifier = Modifier.size(48.dp)
                     ) {
-                        androidx.compose.material3.Icon(
+                        Icon(
                             Icons.Filled.LocalOffer,
                             contentDescription = "Offers",
                             tint = Color.Gray
                         )
                     }
-                    androidx.compose.material3.IconButton(
+                    IconButton(
                         onClick = onLikesClick,
                         modifier = Modifier.size(48.dp)
                     ) {
-                        androidx.compose.material3.Icon(
+                        Icon(
                             Icons.Filled.Favorite,
                             contentDescription = "Likes",
                             tint = Color.Gray
                         )
                     }
-                    androidx.compose.material3.IconButton(
+                    IconButton(
                         onClick = onProfileClick,
                         modifier = Modifier.size(48.dp)
                     ) {
-                        androidx.compose.material3.Icon(
+                        Icon(
                             Icons.Filled.Person,
                             contentDescription = "Profile",
                             tint = Color.Gray
@@ -113,7 +147,7 @@ fun FoodieProfileScreen(
                 .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Imagen de fondo
+            // Background Image
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,26 +163,37 @@ fun FoodieProfileScreen(
                 )
             }
 
-            // Imagen de perfil
+            // Profile Image
             Box(
                 modifier = Modifier
                     .offset(y = (-50).dp)
                     .size(140.dp),
                 contentAlignment = Alignment.BottomEnd
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.user_placeholder2),
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .size(140.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, backgroundColor, CircleShape)
-                )
+                if (profileImageUrl != null) {
+                    Image(
+                        painter = rememberImagePainter(profileImageUrl),
+                        contentDescription = "Profile Photo",
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, backgroundColor, CircleShape)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.user_placeholder2),
+                        contentDescription = "Profile Photo",
+                        modifier = Modifier
+                            .size(140.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, backgroundColor, CircleShape)
+                    )
+                }
             }
 
-            // Nombre y descripción
+            // Username and Description
             Text(
-                text = "Username",
+                text = username,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 color = Color.Black
@@ -161,30 +206,33 @@ fun FoodieProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sección de información
+            // Information Section
             Text(
                 text = "Información",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 40.dp),
                 color = Color.Black,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Username",
+                text = username,
                 fontSize = 16.sp,
                 color = Color.Black
             )
             Text(
-                text = "fernandak@gmail.com",
+                text = email,
                 fontSize = 16.sp,
                 color = Color.Gray
             )
 
-            // Botón para editar información
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Omit Edit Information Button
+            /*
             Button(
                 onClick = onEditInfoClick,
                 colors = ButtonDefaults.buttonColors(backgroundColor = buttonRecoverPasswordColor),
@@ -198,27 +246,22 @@ fun FoodieProfileScreen(
                     color = Color.White
                 )
             }
+            */
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botones de acción (Contraseña)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botón de cerrar sesión
+            // Logout Button
             Button(
-                onClick = onLogoutClick,
+                onClick = {
+                    auth.signOut()
+                    onLogoutClick()
+                },
                 colors = ButtonDefaults.buttonColors(backgroundColor = buttonLogoutColor),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
+                    .padding(horizontal = 16.dp)
             ) {
                 Text(
                     text = "Cerrar Sesión",
@@ -236,8 +279,8 @@ fun FoodieProfileScreenPreview() {
         onHomeClick = {},
         onOffersClick = {},
         onProfileClick = {},
-        onLikesClick = {}, // Agregado para el preview
-        onLogoutClick = {}, // Agregado para el preview
+        onLikesClick = {},
+        onLogoutClick = {},
         onEditInfoClick = {}
     )
 }
