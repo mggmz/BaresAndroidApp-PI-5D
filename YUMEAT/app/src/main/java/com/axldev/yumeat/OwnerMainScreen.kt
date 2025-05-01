@@ -2,17 +2,22 @@ package com.axldev.yumeat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -20,100 +25,246 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun OwnerMainScreenContent(
-    onAddBusinessClick: () -> Unit
+    onAddBusinessClick: () -> Unit,
+    onAddOfferClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+    onEditBusinessClick: (String) -> Unit
 ) {
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+
+    val currentUser = auth.currentUser
+    val userUID = currentUser?.uid
+
+    var username by remember { mutableStateOf<String?>("@Your") }
+    var businesses by remember { mutableStateOf(listOf<Map<String, Any>>()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(userUID) {
+        if (userUID != null) {
+            try {
+                // Obtener el username desde Firestore
+                val userDoc = db.collection("users").document(userUID).get().await()
+                username = userDoc.getString("username")?.let { "@$it" } ?: "@Your"
+
+                // Obtener los negocios del usuario y ordenarlos por fecha de creación
+                val businessDocs = db.collection("business")
+                    .whereEqualTo("userUID", userUID)
+                    .get()
+                    .await()
+
+                businesses = businessDocs.documents.map { doc ->
+                    val data = doc.data as MutableMap<String, Any>
+                    data["id"] = doc.id  // Añadir el ID del documento como un campo más
+                    data
+                }.sortedByDescending { it["createdAt"] as? Long }  // Ordenar los más recientes primero
+
+                loading = false
+            } catch (e: Exception) {
+                loading = false
+                // Manejo de errores si es necesario
+            }
+        }
+    }
+
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                containerColor = Color(0xFFE9E9E9),
-                content = {
-                    IconButton(onClick = { /* Home logic */ }) {
-                        Icon(Icons.Filled.Home, contentDescription = "Home")
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    IconButton(onClick = { /* Location logic */ }) {
-                        Icon(Icons.Filled.Place, contentDescription = "Location")
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddBusinessClick,
-                shape = CircleShape,
-                containerColor = Color(0xFF0072A3)
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add Business", tint = Color.White)
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFFFFFFF))
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Yum Eat",
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            Text(
-                text = "Your Businesses",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Light,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            // Business Card with shadow
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .graphicsLayer {
-                        shadowElevation = 8.dp.toPx()
-                        shape = RoundedCornerShape(16.dp)
-                        clip = true
-                    }
-                    .background(Color.White, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(16.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.food_image),
-                        contentDescription = "Business Image",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .padding(bottom = 8.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                    Text(text = "Oasis Ocean Club", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                    Text(
-                        text = "Calle Delfin 400, Club Santiago Manzanillo, Colima",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "4.7", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        // Add star icons or ratings UI here
+                    IconButton(
+                        onClick = { /* Acción para Home */ },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Home,
+                            contentDescription = "Home",
+                            tint = Color.Gray
+                        )
+                    }
+                    IconButton(
+                        onClick = onAddOfferClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.LocalOffer,
+                            contentDescription = "Offers",
+                            tint = Color.Gray
+                        )
                     }
                 }
             }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFFFFFFF))
+                .padding(innerPadding)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Botón de cerrar sesión en la parte superior izquierda
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            auth.signOut()
+                            onLogoutClick()  // Redirigir al LoginScreen después de cerrar sesión
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(top = 10.dp)
+                    ) {
+                        Icon(Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.Gray)
+                    }
+
+                    // Imagen del logo en lugar de texto "Yum Eat"
+                    Image(
+                        painter = painterResource(id = R.drawable.applogo), // Asegúrate de que el logo esté en la carpeta drawable
+                        contentDescription = "Yum Eat Logo",
+                        modifier = Modifier
+                            .size(225.dp)
+                            .padding(start = 70.dp, top = 0.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                Text(
+                    text = "$username Businesses",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Light,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                )
+
+                // Mostrar "Loading" mientras se cargan los negocios
+                if (loading) {
+                    CircularProgressIndicator()
+                } else if (businesses.isEmpty()) {
+                    Text(text = "You have no businesses", color = Color.Gray)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        items(businesses) { business ->
+                            BusinessCard(
+                                name = business["name"] as String,
+                                address = business["address"] as String,
+                                foodType = business["foodType"] as String,
+                                imageUrl = business["imageUrl"] as? String,
+                                onClick = {
+                                    val businessId = business["id"] as? String
+                                    if (businessId != null) {
+                                        onEditBusinessClick(businessId)
+                                    } else {
+                                        // Manejar el caso donde `businessId` sea nulo o inválido
+                                        println("Error: businessId is null or invalid")
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // FloatingActionButton más grande y alineado a la derecha
+            FloatingActionButton(
+                onClick = {
+                    onAddBusinessClick()
+                },
+                shape = CircleShape,
+                containerColor = Color(0xFF0072A3),
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Add Business", tint = Color.White)
+            }
+        }
+    }
+}
+
+@Composable
+fun BusinessCard(name: String, address: String, foodType: String, imageUrl: String?, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .graphicsLayer {
+                shadowElevation = 8.dp.toPx()
+                shape = RoundedCornerShape(16.dp)
+                clip = true
+            }
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .clickable { onClick() },  // Ahora la tarjeta es clickeable
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Cargar imagen desde URL usando Coil
+            imageUrl?.let {
+                Image(
+                    painter = rememberImagePainter(it),
+                    contentDescription = "Business Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(bottom = 8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: run {
+                // Imagen de reserva si no hay imagen en la base de datos
+                Image(
+                    painter = painterResource(id = R.drawable.food_image),  // Reemplaza con un recurso de imagen adecuado
+                    contentDescription = "Placeholder Business Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(bottom = 8.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Text(text = name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(
+                text = address,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+            Text(text = "Type: $foodType", fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
     }
 }

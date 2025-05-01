@@ -1,15 +1,26 @@
 package com.axldev.yumeat
 
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.axldev.yumeat.clientViews.AdvertisementAndOfferScreen
+import com.axldev.yumeat.clientViews.FoodieMainFeed
+import com.axldev.yumeat.clientViews.FoodieProfileScreen
+import com.axldev.yumeat.clientViews.FoodieRestaurantScreen
+import com.axldev.yumeat.rootViews.ActiveAlertsOffersScreen
+import com.axldev.yumeat.rootViews.RegisteredUsersScreen
 import com.axldev.yumeat.viewmodel.AuthViewModel
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,8 +41,7 @@ class MainActivity : ComponentActivity() {
                 composable("onboarding") {
                     OnboardingScreen(
                         onFinish = {
-                            // Navega siempre a la pantalla de registro o login tras el onboarding
-                            navController.navigate("register") {
+                            navController.navigate("login") {
                                 popUpTo("onboarding") { inclusive = true }
                             }
                         }
@@ -41,8 +51,11 @@ class MainActivity : ComponentActivity() {
                 // Pantalla de Registro
                 composable("register") {
                     RegisterScreen(
-                        onRegisterClick = { email, password ->
-                            authViewModel.registerUser(email, password)
+                        onRegisterClick = { email, password, username, userType ->
+                            authViewModel.registerUser(email, password, username, userType)
+                            navController.navigate("login") {
+                                popUpTo("register") { inclusive = true }
+                            }
                         },
                         onLoginClick = {
                             navController.navigate("login")
@@ -54,13 +67,29 @@ class MainActivity : ComponentActivity() {
                 composable("login") {
                     LoginScreen(
                         onLoginClick = { email, password ->
-                            // Intentar login
-                            authViewModel.loginUser(email, password)
-                            // Verificar si el login fue exitoso (currentUser no es null)
-                            if (authViewModel.currentUser.value != null) {
-                                // Redirigir a la pantalla principal del owner
-                                navController.navigate("owner_main") {
-                                    popUpTo("login") { inclusive = true }
+                            authViewModel.loginUser(email, password) { userType ->
+                                when (userType) {
+                                    "root" -> {
+                                        navController.navigate("root_main") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    }
+
+                                    "vendedor" -> {
+                                        navController.navigate("owner_main") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    }
+
+                                    "cliente" -> {
+                                        navController.navigate("foodie_main") {
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    }
+
+                                    else -> {
+                                        Log.d("MainActivity", "User type not found or invalid")
+                                    }
                                 }
                             }
                         },
@@ -70,23 +99,425 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // Pantalla Principal del Owner
-                composable("owner_main") {
-                    OwnerMainScreenContent(
-                        onAddBusinessClick = {
-                            navController.navigate("add_business")
+                // Foodie Main
+                composable("foodie_main") {
+                    FoodieMainFeed(
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen")
+                        },
+                        onLikesClick = {
+                            navController.navigate("foodie_favorites_screen")
+                        },
+                        onRestaurantClick = {businessId ->
+                            navController.navigate("foodie_restaurant_screen/$businessId")},
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen")
                         }
                     )
                 }
 
-                // Pantalla para Agregar Negocios
-                composable("add_business") {
-                    AddBusinessScreen(
-                        onBusinessAdded = {
-                            navController.popBackStack()
+                //Foodie Restaurant Screen
+
+                composable(
+                    route = "foodie_restaurant_screen/{businessId}",
+                    arguments = listOf(navArgument("businessId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val businessId = backStackEntry.arguments?.getString("businessId") ?: ""
+                    FoodieRestaurantScreen(
+                        businessId = businessId,
+                        onHomeClick = { navController.navigate("foodie_main") },
+                        onOffersClick = {navController.navigate("advertisement_and_offer_screen") {
+                            popUpTo("advertisement_and_offer_screen") { inclusive = true }
+                        } },
+                        onProfileClick = { navController.navigate("foodie_profile_screen") },
+                        onLikesClick = { navController.navigate("foodie_favorites_screen") },
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                // Advertisement and Offers Screen
+                composable("advertisement_and_offer_screen") {
+                    AdvertisementAndOfferScreen(
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen") {
+                                popUpTo("advertisement_and_offer_screen") { inclusive = true }
+                            }
+                        },
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen")
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("advertisement_and_offer_screen") { inclusive = true }
+                            }
                         }
                     )
                 }
+
+
+                // Foodie Profile Screen
+                composable("foodie_profile_screen") {
+                    FoodieProfileScreen(
+                        onHomeClick = {
+                            navController.navigate("foodie_main") {
+                                popUpTo("foodie_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("advertisement_and_offer_screen")
+                        },
+                        onLikesClick = {
+                            navController.navigate("foodie_favorites_screen")
+                        },
+                        onProfileClick = {
+                            navController.navigate("foodie_profile_screen") {
+                                popUpTo("foodie_profile_screen") { inclusive = true }
+                            }
+                        },
+                        onEditInfoClick = {
+                            // Lógica para editar información
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("foodie_profile_screen") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Pantalla principal para Root
+                composable("root_main") {
+                    RegisteredPlacesScreen(
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("root_main") { inclusive = true }
+                            }
+                        },
+                        onHomeClick = {
+                            navController.navigate("root_main") {
+                                popUpTo("root_main") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("offers")
+                        },
+                        onProfileClick = {
+                            navController.navigate("registered_users")
+                        }
+                    )
+                }
+
+                // Pantalla principal para Vendedor
+                composable("owner_main") {
+                    OwnerMainScreenContent(
+                        onAddBusinessClick = {
+                            navController.navigate("add_business")
+                        },
+                        onAddOfferClick = {
+                            navController.navigate("business_owner")
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onEditBusinessClick = { businessId ->
+                            navController.navigate("edit_business/$businessId")
+                        }
+                    )
+                }
+
+                //Add Business
+                composable("add_business") {
+                    AddBusinessScreen(
+                        onBusinessAdded = {
+                            // Regresa a OwnerMainScreen después de añadir el negocio
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Edit Business
+                composable(
+                    route = "edit_business/{businessId}",
+                    arguments = listOf(navArgument("businessId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val businessId = backStackEntry.arguments?.getString("businessId") ?: ""
+                    EditBusinessScreen(
+                        businessId = businessId,
+                        onBusinessUpdated = {
+                            navController.popBackStack() // Vuelve a la pantalla anterior después de actualizar
+                        },
+                        onBusinessDeleted = {
+                            navController.popBackStack() // Vuelve a la pantalla anterior después de eliminar
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable("business_owner") {
+                    BusinessOwnerScreen(
+                        onAddEventClick = {
+                            navController.navigate("add_event")
+                        },
+                        onAddOfferClick = {
+                            navController.navigate("add_offer")
+                        },
+                        onEditEventClick = { eventId ->
+                            navController.navigate("edit_event/$eventId")
+                        },
+                        onEditOfferClick = { offerId ->
+                            navController.navigate("edit_offer/$offerId")
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            if (navController.currentDestination?.route != "business_owner") {
+                                navController.navigate("business_owner") {
+                                    popUpTo("business_owner") { inclusive = true }
+                                }
+                            }
+                        }
+                    )
+                }
+
+                // Edit Event
+                composable("edit_event/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+                    EditEventScreen(
+                        eventId = eventId,
+                        onEventUpdated = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onEventDeleted = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Edit Offer
+                composable("edit_offer/{offerId}") { backStackEntry ->
+                    val offerId = backStackEntry.arguments?.getString("offerId") ?: return@composable
+                    EditOfferScreen(
+                        offerId = offerId,
+                        onOfferUpdated = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onOfferDeleted = {
+                            navController.navigate("business_owner") {
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable("add_event") {
+                    AddEventScreen(
+                        onEventAdded = {
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen después de añadir un evento
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") {
+                                popUpTo("owner_main") { inclusive = true }
+                            }
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") { // Redirige a BusinessOwnerScreen
+                                popUpTo("business_owner") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable("add_offer") {
+                    AddOfferScreen(
+                        onOfferAdded = {
+                            navController.popBackStack() // Regresa a "business_owner" después de agregar una oferta
+                        },
+                        onNavigateToHome = {
+                            navController.navigate("owner_main") // Navega al Home del dueño
+                        },
+                        onNavigateToOffers = {
+                            navController.navigate("business_owner") // Navega a la pantalla de Ofertas
+                        }
+                    )
+                }
+
+
+                composable("offers") {
+                    ActiveAlertsOffersScreen(
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onHomeClick = {
+                            navController.navigate("root_main") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("offers") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onProfileClick = {
+                            navController.navigate("registered_users") {
+                                popUpTo("offers") { inclusive = true }
+                            }
+                        },
+                        onDeleteOfferClick = { offerId ->
+                            // La lógica de eliminación ya está manejada dentro de ActiveAlertsOffersScreen
+                            // Por lo tanto, no es necesario repetirla aquí.
+                            // Si deseas manejar algo adicional, puedes hacerlo aquí.
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("offers").document(offerId).delete()
+                                .addOnSuccessListener {
+                                    Log.d("ActiveAlertsOffers", "Offer deleted successfully")
+                                }
+                                .addOnFailureListener {
+                                    Log.e(
+                                        "ActiveAlertsOffers",
+                                        "Error deleting offer: ${it.message}"
+                                    )
+                                }
+                        },
+                        onDeleteEventClick = { eventId ->
+                            // Similarmente, manejar la eliminación de eventos si es necesario
+                            val db = FirebaseFirestore.getInstance()
+                            db.collection("events").document(eventId).delete()
+                                .addOnSuccessListener {
+                                    Log.d("ActiveAlertsOffers", "Event deleted successfully")
+                                }
+                                .addOnFailureListener {
+                                    Log.e(
+                                        "ActiveAlertsOffers",
+                                        "Error deleting event: ${it.message}"
+                                    )
+                                }
+                        }
+                    )
+                }
+
+
+                // Pantalla principal para Registered Users
+                composable("registered_users") {
+                    RegisteredUsersScreen(
+                        onEditUserClick = { userId ->
+                            navController.navigate("edit_user/$userId")
+                        },
+                        onDeleteUserClick = { userId ->
+                            // Lógica de eliminación de usuario aquí si se necesita, o se deja al componente.
+                        },
+                        onLogoutClick = {
+                            authViewModel.logOut()
+                            navController.navigate("login") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
+                        },
+                        onHomeClick = {
+                            navController.navigate("root_main") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
+                        },
+                        onOffersClick = {
+                            navController.navigate("offers") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
+                        },
+                        onProfileClick = {
+                            navController.navigate("profile") {
+                                popUpTo("registered_users") { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // Oculta la barra de navegación y la barra de estado
+                window.decorView.systemUiVisibility = (
+                        View.SYSTEM_UI_FLAG_FULLSCREEN
+                                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        )
             }
         }
     }

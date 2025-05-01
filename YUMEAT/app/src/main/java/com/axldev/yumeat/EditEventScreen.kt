@@ -1,10 +1,12 @@
 package com.axldev.yumeat
 
-import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
@@ -20,18 +22,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
-import android.widget.Toast
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.tasks.await
 import java.util.*
 
 @Composable
-fun AddEventScreen(
-    onEventAdded: () -> Unit,
-    onNavigateToHome: () -> Unit,  // Parámetro para navegar a Home
-    onNavigateToOffers: () -> Unit // Parámetro para navegar a la pantalla de ofertas
+fun EditEventScreen(
+    eventId: String,
+    onEventUpdated: () -> Unit,
+    onEventDeleted: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToOffers: () -> Unit
 ) {
     var eventName by remember { mutableStateOf("") }
     var eventLocation by remember { mutableStateOf("") }
@@ -39,6 +41,14 @@ fun AddEventScreen(
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
+
+    // Cargar los datos del evento
+    LaunchedEffect(eventId) {
+        val eventDoc = db.collection("events").document(eventId).get().await()
+        eventName = eventDoc.getString("eventName") ?: ""
+        eventLocation = eventDoc.getString("eventLocation") ?: ""
+        eventDate = eventDoc.getString("eventDate") ?: ""
+    }
 
     val currentUser = auth.currentUser
 
@@ -70,13 +80,13 @@ fun AddEventScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = onNavigateToHome,  // Navega al Home cuando se presiona el botón
+                        onClick = onNavigateToHome,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
                     }
                     IconButton(
-                        onClick = onNavigateToOffers,  // Navega a la pantalla de ofertas
+                        onClick = onNavigateToOffers,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
@@ -94,7 +104,7 @@ fun AddEventScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Add Event",
+                text = "Edit Event",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -122,7 +132,7 @@ fun AddEventScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Event Date Field (solo placeholder)
+            // Event Date Field
             OutlinedTextField(
                 value = eventDate,
                 onValueChange = { eventDate = it },
@@ -131,7 +141,7 @@ fun AddEventScreen(
                 readOnly = true
             )
 
-            // Mostrar el DatePicker fijo debajo del campo de fecha
+            // DatePicker
             Spacer(modifier = Modifier.height(16.dp))
             DatePickerView(
                 year = selectedYear,
@@ -147,28 +157,20 @@ fun AddEventScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Update Event Button
             Button(
                 onClick = {
                     if (eventName.isNotEmpty() && eventLocation.isNotEmpty() && eventDate.isNotEmpty()) {
-                        if (currentUser != null) {
-                            val userUID = currentUser.uid
-                            val event = hashMapOf(
-                                "eventName" to eventName,
-                                "eventLocation" to eventLocation,
-                                "eventDate" to eventDate,
-                                "userUID" to userUID
-                            )
-                            db.collection("events")
-                                .add(event)
-                                .addOnSuccessListener {
-                                    Toast.makeText(context, "Event added successfully", Toast.LENGTH_SHORT).show()
-                                    onEventAdded()
-                                }
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(context, "Error adding event: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                        } else {
-                            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
+                        val eventUpdates = mapOf(
+                            "eventName" to eventName,
+                            "eventLocation" to eventLocation,
+                            "eventDate" to eventDate
+                        )
+                        db.collection("events").document(eventId).update(eventUpdates).addOnSuccessListener {
+                            Toast.makeText(context, "Event updated successfully", Toast.LENGTH_SHORT).show()
+                            onEventUpdated()
+                        }.addOnFailureListener { e ->
+                            Toast.makeText(context, "Error updating event: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
@@ -179,32 +181,28 @@ fun AddEventScreen(
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
-                Text(text = "Add Event", color = Color.White)
+                Text(text = "Update Event", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Delete Event Button
+            Button(
+                onClick = {
+                    db.collection("events").document(eventId).delete().addOnSuccessListener {
+                        Toast.makeText(context, "Event deleted successfully", Toast.LENGTH_SHORT).show()
+                        onEventDeleted()
+                    }.addOnFailureListener { e ->
+                        Toast.makeText(context, "Error deleting event: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text(text = "Delete Event", color = Color.White)
             }
         }
     }
-}
-
-@Composable
-fun DatePickerView(
-    year: Int,
-    month: Int,
-    day: Int,
-    onDateChange: (Int, Int, Int) -> Unit
-) {
-    val calendar = Calendar.getInstance()
-
-    // Usar DatePickerView nativo de Android para mostrar un calendario
-    AndroidView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp),
-        factory = { context ->
-            DatePicker(context).apply {
-                init(year, month, day) { _, selectedYear, selectedMonth, selectedDay ->
-                    onDateChange(selectedYear, selectedMonth, selectedDay)
-                }
-            }
-        }
-    )
 }

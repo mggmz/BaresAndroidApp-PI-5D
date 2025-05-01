@@ -4,7 +4,6 @@ import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalOffer
@@ -13,8 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
@@ -23,19 +20,20 @@ import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.draw.clip
 import java.util.*
 
 @Composable
-fun AddEventScreen(
-    onEventAdded: () -> Unit,
-    onNavigateToHome: () -> Unit,  // Parámetro para navegar a Home
-    onNavigateToOffers: () -> Unit // Parámetro para navegar a la pantalla de ofertas
+fun AddOfferScreen(
+    onOfferAdded: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToOffers: () -> Unit
 ) {
-    var eventName by remember { mutableStateOf("") }
-    var eventLocation by remember { mutableStateOf("") }
-    var eventDate by remember { mutableStateOf("") }
+    var offerName by remember { mutableStateOf("") }
+    var offerDetails by remember { mutableStateOf("") }
+    var offerDate by remember { mutableStateOf("") }
     val context = LocalContext.current
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
@@ -50,7 +48,7 @@ fun AddEventScreen(
 
     // Función para actualizar la fecha seleccionada
     fun updateSelectedDate(year: Int, month: Int, day: Int) {
-        eventDate = "$day/${month + 1}/$year"
+        offerDate = "$day/${month + 1}/$year"
     }
 
     Scaffold(
@@ -70,13 +68,13 @@ fun AddEventScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = onNavigateToHome,  // Navega al Home cuando se presiona el botón
+                        onClick = onNavigateToHome,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
                     }
                     IconButton(
-                        onClick = onNavigateToOffers,  // Navega a la pantalla de ofertas
+                        onClick = onNavigateToOffers,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
@@ -94,7 +92,7 @@ fun AddEventScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Add Event",
+                text = "Add Offer",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -102,38 +100,39 @@ fun AddEventScreen(
                     .align(Alignment.CenterHorizontally)
             )
 
-            // Event Name Field
+            // Offer Name Field
             OutlinedTextField(
-                value = eventName,
-                onValueChange = { eventName = it },
-                label = { Text("Event Name") },
+                value = offerName,
+                onValueChange = { offerName = it },
+                label = { Text("Offer Name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Event Location Field
+            // Offer Details Field
             OutlinedTextField(
-                value = eventLocation,
-                onValueChange = { eventLocation = it },
-                label = { Text("Event Location") },
+                value = offerDetails,
+                onValueChange = { offerDetails = it },
+                label = { Text("Offer Details") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Event Date Field (solo placeholder)
+            // Offer Date Field (mostrar solo el placeholder)
             OutlinedTextField(
-                value = eventDate,
-                onValueChange = { eventDate = it },
+                value = offerDate,
+                onValueChange = { offerDate = it },
                 label = { Text("Select Date") },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true
             )
 
-            // Mostrar el DatePicker fijo debajo del campo de fecha
             Spacer(modifier = Modifier.height(16.dp))
-            DatePickerView(
+
+            // Mostrar el DatePicker fijo debajo del campo de fecha
+            DatePickerOfferView(
                 year = selectedYear,
                 month = selectedMonth,
                 day = selectedDay,
@@ -147,25 +146,26 @@ fun AddEventScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Add Offer Button
             Button(
                 onClick = {
-                    if (eventName.isNotEmpty() && eventLocation.isNotEmpty() && eventDate.isNotEmpty()) {
+                    if (offerName.isNotEmpty() && offerDetails.isNotEmpty() && offerDate.isNotEmpty()) {
                         if (currentUser != null) {
                             val userUID = currentUser.uid
-                            val event = hashMapOf(
-                                "eventName" to eventName,
-                                "eventLocation" to eventLocation,
-                                "eventDate" to eventDate,
+                            val offer = hashMapOf(
+                                "offerName" to offerName,
+                                "offerDetails" to offerDetails,
+                                "offerDate" to offerDate,
                                 "userUID" to userUID
                             )
-                            db.collection("events")
-                                .add(event)
+                            db.collection("offers")
+                                .add(offer)
                                 .addOnSuccessListener {
-                                    Toast.makeText(context, "Event added successfully", Toast.LENGTH_SHORT).show()
-                                    onEventAdded()
+                                    Toast.makeText(context, "Offer added successfully", Toast.LENGTH_SHORT).show()
+                                    onOfferAdded()
                                 }
                                 .addOnFailureListener { e ->
-                                    Toast.makeText(context, "Error adding event: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Error adding offer: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
                         } else {
                             Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
@@ -179,22 +179,19 @@ fun AddEventScreen(
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
-                Text(text = "Add Event", color = Color.White)
+                Text(text = "Add Offer", color = Color.White)
             }
         }
     }
 }
 
 @Composable
-fun DatePickerView(
+fun DatePickerOfferView(
     year: Int,
     month: Int,
     day: Int,
     onDateChange: (Int, Int, Int) -> Unit
 ) {
-    val calendar = Calendar.getInstance()
-
-    // Usar DatePickerView nativo de Android para mostrar un calendario
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()

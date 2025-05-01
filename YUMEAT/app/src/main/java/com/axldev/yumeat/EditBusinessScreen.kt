@@ -1,60 +1,84 @@
 package com.axldev.yumeat
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 @Composable
-fun EditBusinessScreen() {
+fun EditBusinessScreen(
+    businessId: String,
+    onBusinessUpdated: () -> Unit,
+    onBusinessDeleted: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToOffers: () -> Unit
+) {
     var name by remember { mutableStateOf("") }
     var foodType by remember { mutableStateOf("") }
-    var facebook by remember { mutableStateOf("") }
-    var instagram by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var openAt by remember { mutableStateOf("") }
     var closeAt by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf(listOf("Fast Food", "American")) }
 
-    // Scaffold to manage BottomAppBar
+    val context = LocalContext.current // Obtenemos el contexto aquí
+    val db = FirebaseFirestore.getInstance()
+
+    LaunchedEffect(businessId) {
+        // Obtener los datos del negocio para pre-poblar los campos
+        val businessDoc = db.collection("business").document(businessId).get().await()
+        name = businessDoc.getString("name") ?: ""
+        foodType = businessDoc.getString("foodType") ?: ""
+        address = businessDoc.getString("address") ?: ""
+        openAt = businessDoc.getString("openAt") ?: ""
+        closeAt = businessDoc.getString("closeAt") ?: ""
+    }
+
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                containerColor = Color(0xFFE9E9E9),
-                content = {
-                    IconButton(onClick = { /* Home logic */ }) {
-                        Icon(Icons.Filled.Home, contentDescription = "Home")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color(0xFFE0E0E0)),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onNavigateToHome,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.Gray)
                     }
-                    Spacer(Modifier.weight(1f))
-                    IconButton(onClick = { /* Navigate logic */ }) {
-                        Icon(Icons.Filled.Place, contentDescription = "Location")
+                    IconButton(
+                        onClick = onNavigateToOffers,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(Icons.Filled.LocalOffer, contentDescription = "Offers", tint = Color.Gray)
                     }
                 }
-            )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -62,16 +86,18 @@ fun EditBusinessScreen() {
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp)
-                .background(Color.White)
+                .background(Color.White),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Add Business",
+                text = "Edit Business",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 12.dp, top = 24.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
-            // Name Field
+            // Nombre del negocio
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -81,7 +107,7 @@ fun EditBusinessScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Food Type Field
+            // Tipo de comida
             OutlinedTextField(
                 value = foodType,
                 onValueChange = { foodType = it },
@@ -91,26 +117,7 @@ fun EditBusinessScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Social Media Fields
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                OutlinedTextField(
-                    value = facebook,
-                    onValueChange = { facebook = it },
-                    label = { Text("Facebook") },
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                OutlinedTextField(
-                    value = instagram,
-                    onValueChange = { instagram = it },
-                    label = { Text("Instagram") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Address Field
+            // Dirección
             OutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
@@ -120,13 +127,15 @@ fun EditBusinessScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Open and Close Times
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // Horario de apertura y cierre
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 OutlinedTextField(
                     value = openAt,
                     onValueChange = { openAt = it },
                     label = { Text("Open At") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
@@ -134,60 +143,56 @@ fun EditBusinessScreen() {
                     value = closeAt,
                     onValueChange = { closeAt = it },
                     label = { Text("Close At") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tags Section
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                tags.forEach { tag ->
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .background(Color(0xFFFFBA8F), shape = RoundedCornerShape(16.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(text = tag)
-                    }
-                }
-                IconButton(onClick = { /* Add new tag logic */ }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add Tag")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Image Upload Section
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add Image")
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Add Images")
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Add Business Button
+            // Botón para actualizar el negocio
             Button(
-                onClick = { /* Add Business logic */ },
+                onClick = {
+                    val businessUpdates = mapOf(
+                        "name" to name,
+                        "foodType" to foodType,
+                        "address" to address,
+                        "openAt" to openAt,
+                        "closeAt" to closeAt
+                    )
+                    db.collection("business").document(businessId).update(businessUpdates).addOnSuccessListener {
+                        Toast.makeText(context, "Business updated successfully", Toast.LENGTH_SHORT).show()
+                        onBusinessUpdated()
+                    }.addOnFailureListener { e ->
+                        Toast.makeText(context, "Error updating business: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0072A3)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
-                Text(text = "Add Business", color = Color.White)
+                Text(text = "Update Business", color = Color.White)
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón para eliminar el negocio
+            Button(
+                onClick = {
+                    db.collection("business").document(businessId).delete().addOnSuccessListener {
+                        Toast.makeText(context, "Business deleted successfully", Toast.LENGTH_SHORT).show()
+                        onBusinessDeleted()
+                    }.addOnFailureListener { e ->
+                        Toast.makeText(context, "Error deleting business: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text(text = "Delete Business", color = Color.White)
+            }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun EditBusinessScreenPreview() {
-    EditBusinessScreen()
 }
